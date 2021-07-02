@@ -191,7 +191,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 0.72021663, y: 1}
+    m_SensorSize: {x: 0.7636364, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -757,7 +757,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 0.72021663, y: 1}
+    m_SensorSize: {x: 0.7636364, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -3371,7 +3371,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 0.72021663, y: 1}
+    m_SensorSize: {x: 0.7636364, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -11351,7 +11351,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 0.72021663, y: 1}
+    m_SensorSize: {x: 0.7636364, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -13471,6 +13471,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   soldiers:
   - {fileID: 0}
+  squadSize: 0
 --- !u!1 &1588148783
 GameObject:
   m_ObjectHideFlags: 3
@@ -15681,7 +15682,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 0.72021663, y: 1}
+    m_SensorSize: {x: 0.7636364, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
