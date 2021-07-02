@@ -46,10 +46,10 @@ public class PlayerAbilitiesController : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(ray, out hit))
         {
-            Transform target = hit.transform;
-            if (target.CompareTag("enemy"))
+            Transform targetTf = hit.transform;
+            if (targetTf.gameObject.GetComponent<Soldier>() != null)
             {
-
+                Soldier targetSoldier = targetTf.gameObject.GetComponent<Soldier>();
                 playerController.lockMove = true;
                 playerController.lockLook = true;
                 telefragCompletion = 0;
@@ -61,7 +61,7 @@ public class PlayerAbilitiesController : MonoBehaviour
                 telefragDolly.m_Path = smoothPath;
                 telefragDolly.m_PathPosition = 0;
                 telefragDolly.m_AutoDolly.m_Enabled = false;
-                telefragCam.m_LookAt = target.transform;
+                telefragCam.m_LookAt = targetTf.transform;
                 telefragCam.gameObject.SetActive(true);
                 StartCoroutine(RaycastBufferTime());
                 //GameObject chargingEffectInstance = Instantiate(chargingEffect, target.position, target.rotation);
@@ -70,21 +70,20 @@ public class PlayerAbilitiesController : MonoBehaviour
                     if (bufferComplete)
                     {
                         ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                        if (Physics.Raycast(ray, out hit) && hit.transform.gameObject != target.gameObject)
+                        if (Physics.Raycast(ray, out hit) && hit.transform.gameObject != targetTf.gameObject)
                         {
                             break;
                         }
                     }
                     if (telefragCompletion >= 100)
                     {
-                        transform.position = target.position;
-                        Destroy(target.gameObject);
-                        Destroy(Instantiate(explosionEffect, target.position, target.rotation), 2.0f);
+                        transform.position = targetTf.position;
+                        targetSoldier.Death();
                         break;
                     }
-                    smoothPath.m_Waypoints[1].position = target.position;
+                    smoothPath.m_Waypoints[1].position = targetTf.position;
                     telefragDolly.m_PathPosition = Mathf.Clamp(smoothPath.MaxPos * ((telefragCompletion - 20) / 100), 0, smoothPath.MaxPos * 0.8f);
-                    telefragCompletion += (40 * (fearVal / 100)) * Time.deltaTime;
+                    telefragCompletion += (40 * (targetSoldier.fear / 100)) * Time.deltaTime;
                     yield return wait;
                 }
                 //Destroy(chargingEffectInstance);
