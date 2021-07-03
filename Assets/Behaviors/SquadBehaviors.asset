@@ -1,0 +1,166 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34a7c8ca992f915438a96c2077353778, type: 3}
+  m_Name: SquadBehaviors
+  m_EditorClassIdentifier: 
+  brickName: Assets/Behaviors/SquadBehaviors.asset
+  xml: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BehaviorBricks xmlns:ref=\"urn:padaone\"
+    version=\"1.0\">\r\n  <BehaviorTree id=\"0\" />\r\n  <runtimeInfo>\r\n    <BehaviorTree
+    id=\"0\" guid=\"3f330695bbf2c66459dcbec3414a6c08\" nextId=\"24\">\r\n      <root>\r\n       
+    <ParallelNode id=\"7\" />\r\n      </root>\r\n      <inputParams>\r\n       
+    <inputValues>\r\n          <entry name=\"currentGoal\" type=\"SquadController+Goal\"
+    isBlackboard=\"False\" value=\"Hunt\" />\r\n        </inputValues>\r\n      </inputParams>\r\n     
+    <outputParams />\r\n      <localParams />\r\n    </BehaviorTree>\r\n    <ParallelNode
+    id=\"7\" policy=\"OrPolicy\">\r\n      <children />\r\n      <inputParams />\r\n     
+    <outputParams />\r\n      <localParams />\r\n    </ParallelNode>\r\n  </runtimeInfo>\r\n 
+    <editorInfo>\r\n    <BehaviorTree id=\"0\" _name=\"SquadBehaviors\" _description=\"\"
+    _removeIfClosed=\"False\">\r\n      <_rootList>\r\n        <elem>\r\n         
+    <ParallelNode id=\"7\" />\r\n        </elem>\r\n        <elem>\r\n          <DecoratorGuard
+    id=\"8\" />\r\n        </elem>\r\n        <elem>\r\n          <ConditionEvalNode
+    id=\"9\" />\r\n        </elem>\r\n        <elem>\r\n          <ActionNode id=\"10\"
+    />\r\n        </elem>\r\n        <elem>\r\n          <RepeatUntilFailed id=\"14\"
+    />\r\n        </elem>\r\n        <elem>\r\n          <RepeatUntilFailed id=\"15\"
+    />\r\n        </elem>\r\n        <elem>\r\n          <DecoratorGuard id=\"16\"
+    />\r\n        </elem>\r\n        <elem>\r\n          <ConditionEvalNode id=\"17\"
+    />\r\n        </elem>\r\n        <elem>\r\n          <ActionNode id=\"18\" />\r\n       
+    </elem>\r\n        <elem>\r\n          <SequenceNode id=\"19\" />\r\n       
+    </elem>\r\n        <elem>\r\n          <RepeatUntilFailed id=\"20\" />\r\n       
+    </elem>\r\n        <elem>\r\n          <DecoratorGuard id=\"21\" />\r\n       
+    </elem>\r\n        <elem>\r\n          <ConditionEvalNode id=\"22\" />\r\n       
+    </elem>\r\n        <elem>\r\n          <ActionNode id=\"23\" />\r\n        </elem>\r\n     
+    </_rootList>\r\n      <_nodes>\r\n        <nodes>\r\n          <RepeatUntilFailed
+    id=\"15\" />\r\n          <ParallelNode id=\"7\" />\r\n          <DecoratorGuard
+    id=\"8\" />\r\n          <ConditionEvalNode id=\"9\" />\r\n          <ActionNode
+    id=\"10\" />\r\n          <RepeatUntilFailed id=\"14\" />\r\n          <DecoratorGuard
+    id=\"16\" />\r\n          <ConditionEvalNode id=\"17\" />\r\n          <ActionNode
+    id=\"18\" />\r\n          <SequenceNode id=\"19\" />\r\n          <RepeatUntilFailed
+    id=\"20\" />\r\n          <DecoratorGuard id=\"21\" />\r\n          <ConditionEvalNode
+    id=\"22\" />\r\n          <ActionNode id=\"23\" />\r\n        </nodes>\r\n     
+    </_nodes>\r\n    </BehaviorTree>\r\n    <ParallelNode id=\"7\">\r\n      <_data>\r\n       
+    <data breakpoint=\"0\" selected=\"False\" position=\"658 -188\" name=\"Parallel\"
+    description=\"Executes all its children in parallel until all of them are successful\"
+    cardinality=\"-1\" hasParent=\"False\">\r\n          <BehaviorTree id=\"0\" />\r\n         
+    <ParallelNode id=\"7\" />\r\n        </data>\r\n      </_data>\r\n    </ParallelNode>\r\n 
+    </editorInfo>\r\n  <runtimeInfo>\r\n    <DecoratorGuard id=\"8\">\r\n      <guard>\r\n       
+    <ConditionEvalNode id=\"9\" />\r\n      </guard>\r\n      <child>\r\n       
+    <ActionNode id=\"10\" />\r\n      </child>\r\n      <inputParams />\r\n     
+    <outputParams />\r\n      <localParams />\r\n    </DecoratorGuard>\r\n    <ConditionEvalNode
+    id=\"9\" policy=\"WAIT_UNTIL_FALSE_AND_FAIL\" name=\"Basic/CheckGoals\">\r\n     
+    <inputParams>\r\n        <inputValues>\r\n          <entry name=\"valueA\" type=\"SquadController+Goal\"
+    isBlackboard=\"False\" value=\"Hunt\" />\r\n          <entry name=\"valueB\"
+    type=\"SquadController+Goal\" isBlackboard=\"True\" blackboard=\"currentGoal\"
+    />\r\n        </inputValues>\r\n      </inputParams>\r\n      <outputParams />\r\n     
+    <localParams />\r\n    </ConditionEvalNode>\r\n    <ActionNode id=\"10\" action=\"GameObject/GetComponent\">\r\n     
+    <inputParams>\r\n        <inputValues>\r\n          <entry name=\"type\" type=\"System.String\"
+    isBlackboard=\"False\" />\r\n        </inputValues>\r\n      </inputParams>\r\n     
+    <outputParams>\r\n        <outputValues>\r\n          <entry name=\"component\"
+    type=\"UnityEngine.Component\" isBlackboard=\"True\" blackboard=\"\" />\r\n       
+    </outputValues>\r\n      </outputParams>\r\n      <localParams />\r\n    </ActionNode>\r\n   
+    <RepeatUntilFailed id=\"14\">\r\n      <child>\r\n        <DecoratorGuard id=\"8\"
+    />\r\n      </child>\r\n      <inputParams />\r\n      <outputParams />\r\n     
+    <localParams />\r\n    </RepeatUntilFailed>\r\n    <RepeatUntilFailed id=\"15\">\r\n     
+    <child>\r\n        <DecoratorGuard id=\"16\" />\r\n      </child>\r\n      <inputParams
+    />\r\n      <outputParams />\r\n      <localParams />\r\n    </RepeatUntilFailed>\r\n   
+    <DecoratorGuard id=\"16\">\r\n      <guard>\r\n        <ConditionEvalNode id=\"17\"
+    />\r\n      </guard>\r\n      <child>\r\n        <ActionNode id=\"18\" />\r\n     
+    </child>\r\n      <inputParams />\r\n      <outputParams />\r\n      <localParams
+    />\r\n    </DecoratorGuard>\r\n    <ConditionEvalNode id=\"17\" policy=\"WAIT_UNTIL_FALSE_AND_FAIL\"
+    name=\"Basic/CheckGoals\">\r\n      <inputParams>\r\n        <inputValues>\r\n         
+    <entry name=\"valueA\" type=\"SquadController+Goal\" isBlackboard=\"False\" value=\"Resupply\"
+    />\r\n          <entry name=\"valueB\" type=\"SquadController+Goal\" isBlackboard=\"True\"
+    blackboard=\"currentGoal\" />\r\n        </inputValues>\r\n      </inputParams>\r\n     
+    <outputParams />\r\n      <localParams />\r\n    </ConditionEvalNode>\r\n   
+    <ActionNode id=\"18\" action=\"SuccessAction\">\r\n      <inputParams />\r\n     
+    <outputParams />\r\n      <localParams />\r\n    </ActionNode>\r\n    <SequenceNode
+    id=\"19\">\r\n      <children>\r\n        <elem>\r\n          <RepeatUntilFailed
+    id=\"14\" />\r\n        </elem>\r\n        <elem>\r\n          <RepeatUntilFailed
+    id=\"15\" />\r\n        </elem>\r\n        <elem>\r\n          <RepeatUntilFailed
+    id=\"20\" />\r\n        </elem>\r\n      </children>\r\n      <inputParams />\r\n     
+    <outputParams />\r\n      <localParams />\r\n    </SequenceNode>\r\n    <RepeatUntilFailed
+    id=\"20\">\r\n      <child>\r\n        <DecoratorGuard id=\"21\" />\r\n     
+    </child>\r\n      <inputParams />\r\n      <outputParams />\r\n      <localParams
+    />\r\n    </RepeatUntilFailed>\r\n    <DecoratorGuard id=\"21\">\r\n      <guard>\r\n       
+    <ConditionEvalNode id=\"22\" />\r\n      </guard>\r\n      <child>\r\n       
+    <ActionNode id=\"23\" />\r\n      </child>\r\n      <inputParams />\r\n     
+    <outputParams />\r\n      <localParams />\r\n    </DecoratorGuard>\r\n    <ConditionEvalNode
+    id=\"22\" policy=\"WAIT_UNTIL_FALSE_AND_FAIL\" name=\"Basic/CheckGoals\">\r\n     
+    <inputParams>\r\n        <inputValues>\r\n          <entry name=\"valueA\" type=\"SquadController+Goal\"
+    isBlackboard=\"False\" value=\"Search\" />\r\n          <entry name=\"valueB\"
+    type=\"SquadController+Goal\" isBlackboard=\"True\" blackboard=\"currentGoal\"
+    />\r\n        </inputValues>\r\n      </inputParams>\r\n      <outputParams />\r\n     
+    <localParams />\r\n    </ConditionEvalNode>\r\n    <ActionNode id=\"23\" action=\"SuccessAction\">\r\n     
+    <inputParams />\r\n      <outputParams />\r\n      <localParams />\r\n    </ActionNode>\r\n 
+    </runtimeInfo>\r\n  <editorInfo>\r\n    <DecoratorGuard id=\"8\">\r\n      <_data>\r\n       
+    <data breakpoint=\"0\" selected=\"False\" position=\"168 306\" name=\"Guard\"
+    description=\"Guard\" cardinality=\"1\" hasParent=\"True\">\r\n          <BehaviorTree
+    id=\"0\" />\r\n          <DecoratorGuard id=\"8\" />\r\n          <RepeatUntilFailed
+    id=\"14\" />\r\n        </data>\r\n      </_data>\r\n    </DecoratorGuard>\r\n   
+    <ConditionEvalNode id=\"9\">\r\n      <_data>\r\n        <data breakpoint=\"0\"
+    selected=\"False\" position=\"168 306\" name=\"Basic/CheckGoals\" description=\"Eval\"
+    cardinality=\"1\" hasParent=\"False\">\r\n          <BehaviorTree id=\"0\" />\r\n         
+    <ConditionEvalNode id=\"9\" />\r\n        </data>\r\n      </_data>\r\n    </ConditionEvalNode>\r\n   
+    <ActionNode id=\"10\">\r\n      <_data>\r\n        <data breakpoint=\"0\" selected=\"False\"
+    position=\"168 306\" name=\"GameObject/GetComponent\" description=\"Gets the
+    component of a given type if the game object has one attached, null if it doesn't\"
+    cardinality=\"0\" hasParent=\"False\">\r\n          <BehaviorTree id=\"0\" />\r\n         
+    <ActionNode id=\"10\" />\r\n        </data>\r\n      </_data>\r\n    </ActionNode>\r\n   
+    <RepeatUntilFailed id=\"14\">\r\n      <_data>\r\n        <data breakpoint=\"0\"
+    selected=\"False\" position=\"226 208\" name=\"Repeat Until Failed\" description=\"Repeats
+    the execution of its child node until it fails\" cardinality=\"1\" hasParent=\"True\">\r\n         
+    <BehaviorTree id=\"0\" />\r\n          <RepeatUntilFailed id=\"14\" />\r\n         
+    <SequenceNode id=\"19\" />\r\n        </data>\r\n      </_data>\r\n    </RepeatUntilFailed>\r\n   
+    <RepeatUntilFailed id=\"15\">\r\n      <_data>\r\n        <data breakpoint=\"0\"
+    selected=\"False\" position=\"506 208\" name=\"Repeat Until Failed\" description=\"Repeats
+    the execution of its child node until it fails\" cardinality=\"1\" hasParent=\"True\">\r\n         
+    <BehaviorTree id=\"0\" />\r\n          <RepeatUntilFailed id=\"15\" />\r\n         
+    <SequenceNode id=\"19\" />\r\n        </data>\r\n      </_data>\r\n    </RepeatUntilFailed>\r\n   
+    <DecoratorGuard id=\"16\">\r\n      <_data>\r\n        <data breakpoint=\"0\"
+    selected=\"False\" position=\"540 322\" name=\"Guard\" description=\"Guard\"
+    cardinality=\"1\" hasParent=\"True\">\r\n          <BehaviorTree id=\"0\" />\r\n         
+    <DecoratorGuard id=\"16\" />\r\n          <RepeatUntilFailed id=\"15\" />\r\n       
+    </data>\r\n      </_data>\r\n    </DecoratorGuard>\r\n    <ConditionEvalNode
+    id=\"17\">\r\n      <_data>\r\n        <data breakpoint=\"0\" selected=\"False\"
+    position=\"540 322\" name=\"Basic/CheckGoals\" description=\"Eval\" cardinality=\"1\"
+    hasParent=\"False\">\r\n          <BehaviorTree id=\"0\" />\r\n          <ConditionEvalNode
+    id=\"17\" />\r\n        </data>\r\n      </_data>\r\n    </ConditionEvalNode>\r\n   
+    <ActionNode id=\"18\">\r\n      <_data>\r\n        <data breakpoint=\"0\" selected=\"False\"
+    position=\"540 322\" name=\"SuccessAction\" description=\"Action that always
+    successes. It executes in one cycle.\" cardinality=\"0\" hasParent=\"False\">\r\n         
+    <BehaviorTree id=\"0\" />\r\n          <ActionNode id=\"18\" />\r\n        </data>\r\n     
+    </_data>\r\n    </ActionNode>\r\n    <SequenceNode id=\"19\">\r\n      <_data>\r\n       
+    <data breakpoint=\"0\" selected=\"False\" position=\"638 -12\" name=\"Sequence\"
+    description=\"Executes all its children in sequence until all of them are successful\"
+    cardinality=\"-1\" hasParent=\"False\">\r\n          <BehaviorTree id=\"0\" />\r\n         
+    <SequenceNode id=\"19\" />\r\n        </data>\r\n      </_data>\r\n    </SequenceNode>\r\n   
+    <RepeatUntilFailed id=\"20\">\r\n      <_data>\r\n        <data breakpoint=\"0\"
+    selected=\"False\" position=\"848 206\" name=\"Repeat Until Failed\" description=\"Repeats
+    the execution of its child node until it fails\" cardinality=\"1\" hasParent=\"True\">\r\n         
+    <BehaviorTree id=\"0\" />\r\n          <RepeatUntilFailed id=\"20\" />\r\n         
+    <SequenceNode id=\"19\" />\r\n        </data>\r\n      </_data>\r\n    </RepeatUntilFailed>\r\n   
+    <DecoratorGuard id=\"21\">\r\n      <_data>\r\n        <data breakpoint=\"0\"
+    selected=\"False\" position=\"846 306\" name=\"Guard\" description=\"Guard\"
+    cardinality=\"1\" hasParent=\"True\">\r\n          <BehaviorTree id=\"0\" />\r\n         
+    <DecoratorGuard id=\"21\" />\r\n          <RepeatUntilFailed id=\"20\" />\r\n       
+    </data>\r\n      </_data>\r\n    </DecoratorGuard>\r\n    <ConditionEvalNode
+    id=\"22\">\r\n      <_data>\r\n        <data breakpoint=\"0\" selected=\"False\"
+    position=\"846 306\" name=\"Basic/CheckGoals\" description=\"Eval\" cardinality=\"1\"
+    hasParent=\"False\">\r\n          <BehaviorTree id=\"0\" />\r\n          <ConditionEvalNode
+    id=\"22\" />\r\n        </data>\r\n      </_data>\r\n    </ConditionEvalNode>\r\n   
+    <ActionNode id=\"23\">\r\n      <_data>\r\n        <data breakpoint=\"0\" selected=\"False\"
+    position=\"846 306\" name=\"SuccessAction\" description=\"Action that always
+    successes. It executes in one cycle.\" cardinality=\"0\" hasParent=\"False\">\r\n         
+    <BehaviorTree id=\"0\" />\r\n          <ActionNode id=\"23\" />\r\n        </data>\r\n     
+    </_data>\r\n    </ActionNode>\r\n  </editorInfo>\r\n</BehaviorBricks>"
+  zoom: 0.6
+  subslist:
+  - {fileID: 11400000, guid: 972b315b96d35ab42bf3d2d9351cfd86, type: 2}
+  _guid: 3f330695bbf2c66459dcbec3414a6c08

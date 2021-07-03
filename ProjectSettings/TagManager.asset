@@ -5,8 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - Shootable
-  - enemy
-  - transparent
+  - Squad
+  - Enemy
+  - Transparent
   layers:
   - Default
   - TransparentFX

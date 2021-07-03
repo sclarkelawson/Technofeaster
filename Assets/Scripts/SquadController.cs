@@ -1,27 +1,29 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using BBCore;
-using Pada1.Xml.Serializer.Utils;
 
 public class SquadController : MonoBehaviour
 {
-    public enum Goal { Hunt, Resupply, Search, FindArmory, FindServer }
-    public enum SoldierType { Grunt, Techie, CyberPriest, Bomber }
+    #region enums
+    public enum Goal { Hunt, Resupply, Search, FindArmory, FindServer, Capture, Regroup }
+    public enum SoldierType { Grunt, Techie, CyberPriest, Trapper }
+    
+    #endregion
+
+    #region variables
     public Goal currentGoal;
     public List<GameObject> soldiers;
     public float squadSize;
-    public Dictionary<string, Vector3> knownLocations;
     public Dictionary<SoldierType, List<GameObject>> availableSoldierTypes;
-    public GameObject squadPrefab;
+    [SerializeField] private GameObject squadPrefab;
+    public bool isGoalComplete;
+    public List<RoomInfo> uncheckedRooms;
+    public Dictionary<RoomInfo.RoomType, List<Vector3>> knownRooms;
+    #endregion
 
-    // Start is called before the first frame update
     void Start()
     {
-        if(soldiers.Count <= 1)
-        {
-            soldiers[0].GetComponent<Soldier>().isIsolated = true;
-        }
+        
     }
 
     // Update is called once per frame
@@ -47,7 +49,7 @@ public class SquadController : MonoBehaviour
     }
     
 
-    void AddSoldier(GameObject soldierObject, Soldier currentSoldier)
+    public void AddSoldier(GameObject soldierObject, Soldier currentSoldier)
     {
         soldiers.Add(soldierObject);
         availableSoldierTypes[currentSoldier.myType].Add(soldierObject);
@@ -59,9 +61,10 @@ public class SquadController : MonoBehaviour
         {
             currentSoldier.isIsolated = false;
         }
+        EvaluateSize();
     }
 
-    void RemoveSoldier(GameObject soldierObject, Soldier currentSoldier)
+    public void RemoveSoldier(GameObject soldierObject, Soldier currentSoldier)
     {
         soldiers.Remove(soldierObject);
         availableSoldierTypes[currentSoldier.myType].Remove(soldierObject);
@@ -73,15 +76,27 @@ public class SquadController : MonoBehaviour
         {
             soldiers[0].GetComponent<Soldier>().isIsolated = true;
         }
+        EvaluateSize();
     }
 
     void EvaluateGoal()
     {
-        int numberOfGrunts = availableSoldierTypes[SoldierType.Grunt].Count, numberOfTechies = availableSoldierTypes[SoldierType.Techie].Count, numberOfPriests = availableSoldierTypes[SoldierType.CyberPriest].Count, numberOfBombers = availableSoldierTypes[SoldierType.Bomber].Count, total = soldiers.Count;
-        if(numberOfTechies >= 1)
+        int numberOfGrunts = availableSoldierTypes[SoldierType.Grunt].Count, numberOfTechies = availableSoldierTypes[SoldierType.Techie].Count, numberOfPriests = availableSoldierTypes[SoldierType.CyberPriest].Count, numberOfTrappers = availableSoldierTypes[SoldierType.Trapper].Count, total = soldiers.Count;
+        if(numberOfTechies >= 1 && knownRooms[RoomInfo.RoomType.Server].Count == 0)
         {
             currentGoal = Goal.FindServer;
         }
+    }
+
+    void EvaluateSize()
+    {
+        squadSize = soldiers.Count * 3.5f;
+        transform.localScale = new Vector3(squadSize, 3, squadSize);
+    }
+
+    void FindNextRoom()
+    {
+        RoomInfo targetRoom = uncheckedRooms[Random.Range(0, uncheckedRooms.Count)];
     }
 
     private void OnTriggerEnter(Collider other)
@@ -89,7 +104,7 @@ public class SquadController : MonoBehaviour
         if (!soldiers.Contains(other.gameObject))
         {
             Soldier newSoldier = other.GetComponent<Soldier>();
-            newSoldier.currentSquad = gameObject;
+            newSoldier.currentSquad = this;
             AddSoldier(other.gameObject, newSoldier);
         }
     }
@@ -101,7 +116,7 @@ public class SquadController : MonoBehaviour
             Soldier newSoldier = other.GetComponent<Soldier>();
             SquadController newSquad = Instantiate(squadPrefab).GetComponent<SquadController>();
             newSquad.AddSoldier(other.gameObject, newSoldier);
-            newSoldier.currentSquad = gameObject;
+            newSoldier.currentSquad = this;
             RemoveSoldier(other.gameObject, newSoldier);
         }
     }
