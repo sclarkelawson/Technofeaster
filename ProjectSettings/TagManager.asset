@@ -8,6 +8,7 @@ TagManager:
   - Squad
   - Enemy
   - Transparent
+  - Access Point
   layers:
   - Default
   - TransparentFX
