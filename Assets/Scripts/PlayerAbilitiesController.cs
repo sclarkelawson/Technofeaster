@@ -42,17 +42,20 @@ public class PlayerAbilitiesController : MonoBehaviour
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
             {
-                Transform targetTf = hit.transform; ;
+                Transform targetTf = hit.transform;
                 string targetTag = hit.transform.gameObject.tag;
+                float telefragModifier;
                 switch (targetTag)
                 {
                     case "Enemy":
                         telefragTargetType = TargetType.Enemy;
-                        StartCoroutine(Telefragging(targetTf, telefragTargetType, hit));
+                        telefragModifier = targetTf.gameObject.GetComponent<Soldier>().fear;
+                        StartCoroutine(Telefragging(targetTf, telefragTargetType, hit, telefragModifier));
                         break;
                     case "Access Point":
                         telefragTargetType = TargetType.AccessPoint;
-                        StartCoroutine(Telefragging(targetTf, telefragTargetType, hit));
+                        telefragModifier = accessSpeed;
+                        StartCoroutine(Telefragging(targetTf, telefragTargetType, hit, telefragModifier));
                         break;
                     default:
                         break;
@@ -61,19 +64,8 @@ public class PlayerAbilitiesController : MonoBehaviour
         }
     }
 
-    IEnumerator Telefragging(Transform targetTf, TargetType telefragTargetType, RaycastHit hit)
+    IEnumerator Telefragging(Transform targetTf, TargetType telefragTargetType, RaycastHit hit, float telefragModifier)
     {
-        float telefragModifier = 0;
-        Soldier targetSoldier = null;
-        if (targetTf.gameObject.GetComponent<Soldier>() != null)
-        {
-            targetSoldier = targetTf.gameObject.GetComponent<Soldier>();
-            telefragModifier = targetSoldier.fear;
-        }
-        else if (telefragTargetType == TargetType.AccessPoint)
-        {
-            telefragModifier = accessSpeed;
-        }
         playerController.lockMove = true;
         playerController.lockLook = true;
         telefragCompletion = 0;
@@ -101,15 +93,7 @@ public class PlayerAbilitiesController : MonoBehaviour
             }
             if (telefragCompletion >= 100)
             {
-                if (telefragTargetType == TargetType.Enemy)
-                {
-                    targetSoldier.Death();
-                    transform.position = targetTf.position;
-                }
-                else if(telefragTargetType == TargetType.AccessPoint)
-                {
-
-                }
+                
                 break;
             }
             smoothPath.m_Waypoints[1].position = targetTf.position;
@@ -117,11 +101,21 @@ public class PlayerAbilitiesController : MonoBehaviour
             telefragCompletion += (50 * (telefragModifier / 100)) * Time.deltaTime;
             yield return wait;
         }
-        //Destroy(chargingEffectInstance);
         telefragCam.gameObject.SetActive(false);
+        if (telefragTargetType == TargetType.Enemy)
+        {
+            targetTf.gameObject.GetComponent<Soldier>().Death();
+            transform.position = targetTf.position;
+        }
+        else if (telefragTargetType == TargetType.AccessPoint)
+        {
+            StartCoroutine(targetTf.gameObject.GetComponent<AccessPointController>().EnterNetwork());
+        }
+        //Destroy(chargingEffectInstance);
         playerController.lockMove = false;
         playerController.lockLook = false;
         Destroy(smoothPath.gameObject);
+
     }
     void EndTelefrag()
     {

@@ -9,6 +9,7 @@ TagManager:
   - Enemy
   - Transparent
   - Access Point
+  - Camera
   layers:
   - Default
   - TransparentFX
