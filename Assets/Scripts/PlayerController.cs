@@ -27,7 +27,7 @@ public class PlayerController : MonoBehaviour
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
         inputXY = new Vector2(horizontalInput, verticalInput);
-        Vector3 MoveDirection = (playerCamForward * inputXY.y * speed + playerCamRight * inputXY.x * speed);
+        Vector3 MoveDirection = (playerCamForward * inputXY.y * speed + transform.right * inputXY.x * speed);
         Vector3 newVelocity = new Vector3(MoveDirection.x, playerRb.velocity.y, MoveDirection.z);
         if (newVelocity != Vector3.zero)
         {

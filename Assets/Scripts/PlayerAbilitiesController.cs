@@ -80,6 +80,7 @@ public class PlayerAbilitiesController : MonoBehaviour
         telefragCam.m_LookAt = targetTf.transform;
         telefragCam.gameObject.SetActive(true);
         StartCoroutine(RaycastBufferTime());
+        //Play charging sound
         //GameObject chargingEffectInstance = Instantiate(chargingEffect, target.position, target.rotation);
         while (Input.GetButton("Fire1"))
         {
@@ -113,6 +114,7 @@ public class PlayerAbilitiesController : MonoBehaviour
             //play effect on player
         }
         //Destroy(chargingEffectInstance);
+        //End charging sound
         playerController.lockMove = false;
         playerController.lockLook = false;
         Destroy(smoothPath.gameObject);
