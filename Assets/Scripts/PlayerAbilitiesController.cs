@@ -102,14 +102,15 @@ public class PlayerAbilitiesController : MonoBehaviour
             yield return wait;
         }
         telefragCam.gameObject.SetActive(false);
-        if (telefragTargetType == TargetType.Enemy)
+        if (telefragTargetType == TargetType.Enemy && telefragCompletion >= 100)
         {
             targetTf.gameObject.GetComponent<Soldier>().Death();
             transform.position = targetTf.position;
         }
-        else if (telefragTargetType == TargetType.AccessPoint)
+        else if (telefragTargetType == TargetType.AccessPoint && telefragCompletion >= 100)
         {
             StartCoroutine(targetTf.gameObject.GetComponent<AccessPointController>().EnterNetwork());
+            //play effect on player
         }
         //Destroy(chargingEffectInstance);
         playerController.lockMove = false;
