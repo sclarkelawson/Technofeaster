@@ -21,8 +21,10 @@ public class SquadController : MonoBehaviour
     [SerializeField] private GameObject squadPrefab;
     public bool isGoalComplete;
     public GameObject protectTarget;
+    public List<RoomInfo> allRooms;
     public List<RoomInfo> uncheckedRooms;
     public Dictionary<RoomInfo.RoomType, List<Vector3>> knownRooms;
+    //public List<FormationInfo> formationPositions;
     public RoomInfo targetRoom;
     public HuntOrCapture huntOrCapture;
     public Vector3 lastKnownPosition, regroupPosition;
@@ -30,6 +32,7 @@ public class SquadController : MonoBehaviour
 
     void Start()
     {
+        uncheckedRooms = allRooms;
         EvaluateSize();
     }
     void Update()
@@ -42,7 +45,7 @@ public class SquadController : MonoBehaviour
             case Goal.FindServer:
                 if (isGoalComplete)
                 {
-                    SelectRandomRoom();
+                    targetRoom = SelectRandomRoom(false);
                     isGoalComplete = false;
                 }
                 break;
@@ -56,13 +59,13 @@ public class SquadController : MonoBehaviour
                     currentGoal = previousGoal;
                 }
                 break;
-            case Goal.ToTarget:
+            case Goal.ToTarget: //done
                 for (int i = 0; i < soldiersInRange.Count; i++)
                 {
                     soldiersInRange[i].GetComponent<Soldier>().lastKnownPosition = lastKnownPosition;
                 }
                 break;
-            case Goal.Protecting:
+            case Goal.Protecting: //done
                 if(protectExpireTimer <= 0)
                 {
                     currentGoal = previousGoal;
@@ -108,6 +111,7 @@ public class SquadController : MonoBehaviour
             tempFear += soldiersInSquad[i].GetComponent<Soldier>().fear;
         }
         tempFear /= soldiersInSquad.Count;
+        averageFear = tempFear;
         if (numberOfTechies >= 1)
         {
             huntOrCapture = HuntOrCapture.Capture;
@@ -166,19 +170,40 @@ public class SquadController : MonoBehaviour
             currentGoal = Goal.Regroup;
         }
     }
-    void SelectRandomRoom() //done, untested
+    RoomInfo SelectRandomRoom(bool includeChecked) //done, untested
     {
-        targetRoom = uncheckedRooms[Random.Range(0, uncheckedRooms.Count)];
-    }
-    void SelectClosestRoom() //done, untested
-    {
-        uncheckedRooms.Sort(delegate (RoomInfo a, RoomInfo b)
+        if (includeChecked)
         {
-            return (this.transform.position - a.transform.position).sqrMagnitude
-            .CompareTo(
-              (this.transform.position - b.transform.position).sqrMagnitude);
-        }); //https://answers.unity.com/questions/341065/sort-a-list-of-gameobjects-by-distance.html
-        targetRoom = uncheckedRooms[0];
+            return allRooms[Random.Range(0, uncheckedRooms.Count)];
+        }
+        else
+        {
+            return uncheckedRooms[Random.Range(0, uncheckedRooms.Count)];
+        }
+    }
+    RoomInfo SelectClosestRoom(Transform start, bool includeChecked) //done, untested
+    {
+        if (includeChecked)
+        {
+            uncheckedRooms.Sort(delegate (RoomInfo a, RoomInfo b)
+            {
+                return (start.position - a.transform.position).sqrMagnitude
+                .CompareTo(
+                  (start.position - b.transform.position).sqrMagnitude);
+            }); //https://answers.unity.com/questions/341065/sort-a-list-of-gameobjects-by-distance.html
+            return allRooms[0];
+        }
+        else
+        {
+            uncheckedRooms.Sort(delegate (RoomInfo a, RoomInfo b)
+            {
+                return (start.position - a.transform.position).sqrMagnitude
+                .CompareTo(
+                  (start.position - b.transform.position).sqrMagnitude);
+            }); //https://answers.unity.com/questions/341065/sort-a-list-of-gameobjects-by-distance.html
+            return uncheckedRooms[0];
+        }
+        
     }
     public static float GetPathLength(NavMeshPath path)
     {
@@ -196,7 +221,7 @@ public class SquadController : MonoBehaviour
     } //https://forum.unity.com/threads/getting-the-distance-in-nav-mesh.315846/
     private void OnTriggerEnter(Collider other) //done, untested
     {
-        if (!soldiersInRange.Contains(other.gameObject))
+        if (!soldiersInRange.Contains(other.gameObject) && other.CompareTag("Enemy"))
         {
             Soldier newSoldier = other.GetComponent<Soldier>();
             newSoldier.isIsolated = false;

@@ -10,6 +10,7 @@ public class AccessPointController : MonoBehaviour
 
     public IEnumerator EnterNetwork()
     {
+        cameraController.playerController.isWounded = false;
         cameraController.fadeToBlackCamera.SetActive(true);
         yield return new WaitForSeconds(0.1f);
         cameraController.playerAbilitiesController.tpCam.gameObject.SetActive(false);

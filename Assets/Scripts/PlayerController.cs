@@ -8,7 +8,7 @@ public class PlayerController : MonoBehaviour
     public Transform playerCameraTf;
     public Rigidbody playerRb;
     public float speed;
-    public bool lockMove, lockLook;
+    public bool lockMove, lockLook, isWounded;
     Vector2 inputXY;
 
     // Start is called before the first frame update
@@ -27,12 +27,16 @@ public class PlayerController : MonoBehaviour
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
         inputXY = new Vector2(horizontalInput, verticalInput);
-        Vector3 MoveDirection = (playerCamForward * inputXY.y * speed + transform.right * inputXY.x * speed);
-        Vector3 newVelocity = new Vector3(MoveDirection.x, playerRb.velocity.y, MoveDirection.z);
-        if (newVelocity != Vector3.zero)
+        Vector3 moveDirection = (playerCamForward * inputXY.y * speed + playerCamRight * inputXY.x * speed);
+        if (isWounded)
+        {
+            moveDirection /= 2;
+        }
+        Vector3 newVelocity = new Vector3(moveDirection.x, playerRb.velocity.y, moveDirection.z);
+        if (moveDirection != Vector3.zero)
         {
             playerRb.velocity = newVelocity;
-            transform.forward = MoveDirection;
+            transform.forward = moveDirection;
         }
         else
         {

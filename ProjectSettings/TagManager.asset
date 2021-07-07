@@ -10,6 +10,7 @@ TagManager:
   - Transparent
   - Access Point
   - Camera
+  - Decoy
   layers:
   - Default
   - TransparentFX
@@ -17,7 +18,7 @@ TagManager:
   - 
   - Water
   - UI
-  - 
+  - Shot
   - 
   - Lighting
   - Ground

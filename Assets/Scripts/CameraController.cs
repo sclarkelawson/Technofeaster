@@ -9,6 +9,7 @@ public class CameraController : MonoBehaviour
     public GameObject currentCamera, fadeToBlackCamera, player;
     public Transform playerTf;
     public PlayerAbilitiesController playerAbilitiesController;
+    public PlayerController playerController;
     public bool changingCameras;
     private void Start()
     {
