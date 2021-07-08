@@ -8,6 +8,7 @@ public class RoomDoor : MonoBehaviour, Door
     public float percentOpen { get; set; }
     public List<GameObject> canOpen { get; set; }
     public Animator animator { get; set; }
+
     public RoomInfo connectedRoom;
     
     void Start() //Start closed
@@ -15,18 +16,16 @@ public class RoomDoor : MonoBehaviour, Door
         percentOpen = 0;
         animator = gameObject.GetComponentInChildren<Animator>();
         canOpen = new List<GameObject>();
+        isOpen = false;
     }
-    public void Open(float value)
+    public void Open()
     {
-        if(percentOpen >= 100)
+        Debug.Log("opening");
+        animator.Play("open");
+        isOpen = true;
+        if (!connectedRoom.evaluated)
         {
-            animator.Play("open");
-            isOpen = true;
             connectedRoom.EvaluateRoom();
-        }
-        else
-        {
-            percentOpen += value;
         }
     }
     public void Open(float value, SquadController squad)
@@ -35,23 +34,26 @@ public class RoomDoor : MonoBehaviour, Door
         {
             isOpen = true;
             animator.Play("open");
-            connectedRoom.EvaluateRoom(squad);
+            if (!connectedRoom.evaluated)
+            {
+                connectedRoom.EvaluateRoom(squad);
+            }
         }
         else
         {
             percentOpen += value;
         }
+
     }
     public void Close()
     {
         animator.Play("close");
+        isOpen = false;
     }
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log(other.tag);
         if (other.CompareTag("Enemy") && !canOpen.Contains(other.gameObject))
         {
-            Debug.Log("adding " + other.name);
             canOpen.Add(other.gameObject);
         }
     }
@@ -59,7 +61,6 @@ public class RoomDoor : MonoBehaviour, Door
     {
         if (canOpen.Contains(other.gameObject))
         {
-            Debug.Log("removing " + other.name);
             canOpen.Remove(other.gameObject);
         }
     }

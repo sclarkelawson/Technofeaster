@@ -12,6 +12,7 @@ TagManager:
   - Camera
   - Decoy
   - Door
+  - Interactable
   layers:
   - Default
   - TransparentFX

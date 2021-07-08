@@ -11,20 +11,14 @@ public class HallwayDoor : MonoBehaviour, Door
     void Start() //Start open
     {
         percentOpen = 100;
-        animator = gameObject.GetComponent<Animator>();
+        animator = gameObject.GetComponentInChildren<Animator>();
         canOpen = new List<GameObject>();
+        isOpen = true;
     }
-    public void Open(float value)
+    public void Open()
     {
-        if (percentOpen >= 100)
-        {
-            animator.Play("open");
-        }
-        else
-        {
-            percentOpen += value;
-        }
-
+        animator.Play("open");
+        isOpen = true;
     }
     public void Open(float value, SquadController squad)
     {
@@ -42,5 +36,6 @@ public class HallwayDoor : MonoBehaviour, Door
     public void Close()
     {
         animator.Play("close");
+        isOpen = false;
     }
 }

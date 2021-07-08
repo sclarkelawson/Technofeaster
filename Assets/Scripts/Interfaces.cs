@@ -45,7 +45,12 @@ public interface Door
     float percentOpen { get; set; }
     public List<GameObject> canOpen { get; set; }
     public Animator animator { get; set; }
-    public void Open(float value);
+    public void Open();
     public void Open(float value, SquadController squad);
     public void Close();
+}
+
+public interface Interactable
+{
+    public void Toggle();
 }

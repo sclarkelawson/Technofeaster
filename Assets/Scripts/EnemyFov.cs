@@ -28,6 +28,10 @@ public class EnemyFov : MonoBehaviour
         {
             connectedSoldier.targetTf = other.transform;
         }
+        else if(connectedSoldier.myGoal == Soldier.SoldierGoal.Regroup || connectedSoldier.mySquad.goalList.Peek() == SquadController.Goal.Regroup)
+        {
+
+        }
     }
     private void OnTriggerExit(Collider other)
     {

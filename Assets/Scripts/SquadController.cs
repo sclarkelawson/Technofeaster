@@ -17,7 +17,7 @@ public class SquadController : MonoBehaviour
     public Stack<Goal> goalList;
     public List<GameObject> soldiersInSquad;
     public List<GameObject> soldiersInRange;
-    public float squadSize, protectExpireTimer, averageFear, roomLuck;
+    public float squadSize, protectExpireTimer, averageFear, roomLuck, timer, wanderTimer, wanderRadius;
     public Dictionary<SoldierType, List<GameObject>> availableSoldierInRange;
     //[SerializeField] private GameObject squadPrefab;
     public bool isGoalComplete, sentGoal;
@@ -35,7 +35,7 @@ public class SquadController : MonoBehaviour
 
     void Start()
     {
-        uncheckedRooms = allRooms;
+        uncheckedRooms = new List<RoomInfo>(allRooms);
         sentGoal = false;
         availableSoldierInRange = new Dictionary<SoldierType, List<GameObject>>();
         knownRooms = new Dictionary<RoomInfo.RoomType, List<RoomInfo>>();
@@ -51,6 +51,7 @@ public class SquadController : MonoBehaviour
         goalList = new Stack<Goal>();
         goalList.Push(Goal.FindServer);
         myAgent.SetDestination(targetRoom.entrance.position);
+        timer = wanderTimer;
         EvaluateSize();
     }
     void Update()
@@ -59,19 +60,41 @@ public class SquadController : MonoBehaviour
         switch (goalList.Peek())
         {
             case Goal.Hunt:
-                
+                if (availableSoldierInRange[SoldierType.Techie].Count == 0 && soldiersInRange.Count != soldiersInSquad.Count)
+                {
+                    goalList.Push(Goal.Regroup);
+                    break;
+                }
+                timer += Time.deltaTime;
+                if (timer >= wanderTimer)
+                {
+                    Vector3 newPos = RandomNavSphere(transform.position, wanderRadius, -1);
+                    myAgent.SetDestination(newPos);
+                    timer = 0;
+                }
                 break;
             case Goal.FindServer: //done
                 if (isGoalComplete)
                 {
+                    Debug.Log("Goal complete");
                     if (knownRooms[RoomInfo.RoomType.Server].Count > 0)
                     {
                         goalList.Clear();
                         goalList.Push(Goal.Hunt);
+                        EvaluateSize();
                     }
                     else
                     {
+                        roomLuck += 50 / allRooms.Count;
                         targetRoom = SelectRandomRoom(false);
+                        if (targetRoom == null)
+                        {
+                            Debug.Log("hunting");
+                            goalList.Clear();
+                            goalList.Push(Goal.Hunt);
+                            EvaluateSize();
+                            break;
+                        }
                         myAgent.SetDestination(targetRoom.entrance.position);
                         isGoalComplete = false;
                     }
@@ -90,10 +113,18 @@ public class SquadController : MonoBehaviour
                     {
                         goalList.Clear();
                         goalList.Push(Goal.Hunt);
+                        EvaluateSize();
                     }
                     else
                     {
                         targetRoom = SelectRandomRoom(false);
+                        if(targetRoom == null)
+                        {
+                            goalList.Clear();
+                            goalList.Push(Goal.Hunt);
+                            EvaluateSize();
+                            break;
+                        }
                         myAgent.SetDestination(targetRoom.entrance.position);
                         isGoalComplete = false;
                     }
@@ -110,6 +141,7 @@ public class SquadController : MonoBehaviour
             case Goal.Search: //done
                 if (isGoalComplete)
                 {
+                    Debug.Log("pop Search");
                     goalList.Pop();
                 }
                 myAgent.isStopped = true;
@@ -171,6 +203,7 @@ public class SquadController : MonoBehaviour
     }
     public void EvaluateRequest(GameObject requester, Soldier requesterSoldier, SoldierRequest request, Vector3 targetPosition)
     {
+        
         switch (request)
         {
             case SoldierRequest.Engaging:
@@ -189,8 +222,9 @@ public class SquadController : MonoBehaviour
                 break;
         }
     }
-    public void EvaluateRequest(GameObject requester, Soldier requesterSoldier, SoldierRequest request)
+    public void EvaluateRequest(GameObject requester, SoldierRequest request)
     {
+        Debug.Log("Evaluating request: " + request);
         switch (request)
         {
             case SoldierRequest.Protect: //done
@@ -208,9 +242,13 @@ public class SquadController : MonoBehaviour
                 goalList.Push(Goal.Search);
                 break;
             case SoldierRequest.SearchComplete:
-                knownRooms[targetRoom.myType].Add(targetRoom);
-                uncheckedRooms.Remove(targetRoom);
-                isGoalComplete = true;
+                if(goalList.Peek() == Goal.Search)
+                {
+                    knownRooms[targetRoom.myType].Add(targetRoom);
+                    Debug.Log("removing " + targetRoom.gameObject.name);
+                    uncheckedRooms.Remove(targetRoom);
+                    isGoalComplete = true;
+                }
                 break;
         }
     }
@@ -224,6 +262,18 @@ public class SquadController : MonoBehaviour
             goalList.Push(Goal.Regroup);
         }
     }
+    public static Vector3 RandomNavSphere(Vector3 origin, float dist, int layermask) //https://forum.unity.com/threads/solved-random-wander-ai-using-navmesh.327950/
+    {
+        Vector3 randDirection = Random.insideUnitSphere * dist;
+
+        randDirection += origin;
+
+        NavMeshHit navHit;
+
+        NavMesh.SamplePosition(randDirection, out navHit, dist, layermask);
+
+        return navHit.position;
+    }
     void SendGoal(Goal goal)
     {
         for (int i = 0; i < soldiersInSquad.Count; i++)
@@ -236,24 +286,25 @@ public class SquadController : MonoBehaviour
     }
     RoomInfo SelectRandomRoom(bool includeChecked) //done, untested
     {
-        if (includeChecked)
-        {
-            return allRooms[Random.Range(0, uncheckedRooms.Count)];
-        }
-        else
+        if(!includeChecked && uncheckedRooms.Count > 0)
         {
             return uncheckedRooms[Random.Range(0, uncheckedRooms.Count)];
         }
+        else if (includeChecked)
+        {
+            return allRooms[Random.Range(0, uncheckedRooms.Count)];
+        }
+        return null;
     }
-    RoomInfo SelectClosestRoom(Transform start, bool includeChecked) //done, untested
+    RoomInfo SelectClosestRoom(Vector3 start, bool includeChecked) //done, untested
     {
         if (includeChecked)
         {
             uncheckedRooms.Sort(delegate (RoomInfo a, RoomInfo b)
             {
-                return (start.position - a.transform.position).sqrMagnitude
+                return (start - a.transform.position).sqrMagnitude
                 .CompareTo(
-                  (start.position - b.transform.position).sqrMagnitude);
+                  (start - b.transform.position).sqrMagnitude);
             }); //https://answers.unity.com/questions/341065/sort-a-list-of-gameobjects-by-distance.html
             return allRooms[0];
         }
@@ -261,9 +312,9 @@ public class SquadController : MonoBehaviour
         {
             uncheckedRooms.Sort(delegate (RoomInfo a, RoomInfo b)
             {
-                return (start.position - a.transform.position).sqrMagnitude
+                return (start - a.transform.position).sqrMagnitude
                 .CompareTo(
-                  (start.position - b.transform.position).sqrMagnitude);
+                  (start - b.transform.position).sqrMagnitude);
             }); //https://answers.unity.com/questions/341065/sort-a-list-of-gameobjects-by-distance.html
             return uncheckedRooms[0];
         }

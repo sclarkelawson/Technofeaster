@@ -5,7 +5,7 @@ using Cinemachine;
 
 public class PlayerAbilitiesController : MonoBehaviour
 {
-    public enum TargetType { Enemy, AccessPoint }
+    public enum TargetType { Enemy, AccessPoint, Door, Interactable }
     WaitForFixedUpdate wait;
     public CinemachineVirtualCamera telefragCam;
     public CinemachineTrackedDolly telefragDolly;
@@ -25,7 +25,7 @@ public class PlayerAbilitiesController : MonoBehaviour
     void Start()
     {
         telefragDolly = telefragCam.GetCinemachineComponent<CinemachineTrackedDolly>();
-        telefragMask = ~LayerMask.GetMask("Ignore Raycast", "TransparentFX");
+        telefragMask = ~LayerMask.GetMask("Ignore Raycast");
     }
 
     // Update is called once per frame
@@ -40,6 +40,15 @@ public class PlayerAbilitiesController : MonoBehaviour
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
+            //List<RaycastHit> hits = new List<RaycastHit>(Physics.RaycastAll(ray, 100f, telefragMask));
+            //RaycastHit[] hits = Physics.RaycastAll(ray, 100f, telefragMask);
+            //for (int i = 0; i < hits.Length; i++)
+            //{
+            //    hit = hits[i];
+            //    Transform targetTf = hit.transform;
+            //    string targetTag = hit.transform.gameObject.tag;
+            //    float telefragModifier;
+            //}
             if (Physics.Raycast(ray, out hit, Mathf.Infinity, telefragMask))
             {
                 Transform targetTf = hit.transform;
@@ -54,6 +63,16 @@ public class PlayerAbilitiesController : MonoBehaviour
                         break;
                     case "Access Point":
                         telefragTargetType = TargetType.AccessPoint;
+                        telefragModifier = accessSpeed;
+                        StartCoroutine(Telefragging(targetTf, telefragTargetType, hit, telefragModifier));
+                        break;
+                    case "Door":
+                        telefragTargetType = TargetType.Door;
+                        telefragModifier = accessSpeed / 2;
+                        StartCoroutine(Telefragging(targetTf, telefragTargetType, hit, telefragModifier));
+                        break;
+                    case "Interactable":
+                        telefragTargetType = TargetType.Interactable;
                         telefragModifier = accessSpeed;
                         StartCoroutine(Telefragging(targetTf, telefragTargetType, hit, telefragModifier));
                         break;
@@ -79,6 +98,7 @@ public class PlayerAbilitiesController : MonoBehaviour
         telefragDolly.m_AutoDolly.m_Enabled = false;
         telefragCam.m_LookAt = targetTf.transform;
         telefragCam.gameObject.SetActive(true);
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         StartCoroutine(RaycastBufferTime());
         //Play charging sound
         //GameObject chargingEffectInstance = Instantiate(chargingEffect, target.position, target.rotation);
@@ -86,7 +106,6 @@ public class PlayerAbilitiesController : MonoBehaviour
         {
             if (bufferComplete)
             {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                 if (Physics.Raycast(ray, out hit, Mathf.Infinity, telefragMask) && hit.transform.gameObject != targetTf.gameObject)
                 {
                     break;
@@ -94,7 +113,6 @@ public class PlayerAbilitiesController : MonoBehaviour
             }
             if (telefragCompletion >= 100)
             {
-                
                 break;
             }
             smoothPath.m_Waypoints[1].position = targetTf.position;
@@ -113,6 +131,22 @@ public class PlayerAbilitiesController : MonoBehaviour
             StartCoroutine(targetTf.gameObject.GetComponent<AccessPointController>().EnterNetwork());
             //play effect on player
         }
+        else if (telefragTargetType == TargetType.Door && telefragCompletion >= 100)
+        {
+            Door targetDoor = targetTf.gameObject.GetComponent<Door>();
+            if (!targetDoor.isOpen)
+            {
+                targetDoor.Open();
+            }
+            else
+            {
+                targetDoor.Close();
+            }
+        }
+        else if (telefragTargetType == TargetType.Interactable && telefragCompletion >= 100)
+        {
+            targetTf.gameObject.GetComponent<Interactable>().Toggle();
+        }
         //Destroy(chargingEffectInstance);
         //End charging sound
         playerController.lockMove = false;
@@ -120,14 +154,11 @@ public class PlayerAbilitiesController : MonoBehaviour
         Destroy(smoothPath.gameObject);
 
     }
-    void EndTelefrag()
-    {
-        
-    }
 
     IEnumerator RaycastBufferTime()
     {
         yield return new WaitForSeconds(raycastBuffer);
         bufferComplete = true;
     }
+
 }

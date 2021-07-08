@@ -140,7 +140,7 @@ public class Grunt : MonoBehaviour, Soldier
                 break;
             case Soldier.SoldierGoal.RequestProtection:
                 Debug.Log("requesting help");
-                mySquad.EvaluateRequest(gameObject, this, SquadController.SoldierRequest.Protect);
+                mySquad.EvaluateRequest(gameObject, SquadController.SoldierRequest.Protect);
                 break;
         }
     }
@@ -163,8 +163,8 @@ public class Grunt : MonoBehaviour, Soldier
                 MoveToSquad();
                 break;
             case SquadController.Goal.Regroup:
-                Debug.Log("regrouping");
                 MoveToSquad();
+
                 break;
             case SquadController.Goal.Search: //if not techie, wait and spin around room
                 RoomDoor targetDoor = mySquad.targetRoom.door;
@@ -272,7 +272,7 @@ public class Grunt : MonoBehaviour, Soldier
     void MoveToSquad()
     {
         navAgent.SetDestination(mySquad.transform.position);
-        if (navAgent.remainingDistance >= 1)
+        if (navAgent.remainingDistance >= 2)
         {
             navAgent.isStopped = false;
         }
@@ -302,10 +302,9 @@ public class Grunt : MonoBehaviour, Soldier
     {
         while(!targetDoor.isOpen)
         {
-            Debug.Log("opening");
             targetDoor.Open(techSkill, mySquad);
             yield return new WaitForSeconds(1f);
         }
-        mySquad.EvaluateRequest(gameObject, this, SquadController.SoldierRequest.SearchComplete);
+        mySquad.EvaluateRequest(gameObject, SquadController.SoldierRequest.SearchComplete);
     }
 }
