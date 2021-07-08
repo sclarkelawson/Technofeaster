@@ -25,7 +25,7 @@ public class PlayerAbilitiesController : MonoBehaviour
     void Start()
     {
         telefragDolly = telefragCam.GetCinemachineComponent<CinemachineTrackedDolly>();
-        telefragMask = ~LayerMask.GetMask("Ignore Raycast");
+        telefragMask = ~LayerMask.GetMask("Ignore Raycast", "TransparentFX");
     }
 
     // Update is called once per frame
@@ -40,7 +40,7 @@ public class PlayerAbilitiesController : MonoBehaviour
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
-            if (Physics.Raycast(ray, out hit))
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity, telefragMask))
             {
                 Transform targetTf = hit.transform;
                 string targetTag = hit.transform.gameObject.tag;
@@ -87,7 +87,7 @@ public class PlayerAbilitiesController : MonoBehaviour
             if (bufferComplete)
             {
                 Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                if (Physics.Raycast(ray, out hit) && hit.transform.gameObject != targetTf.gameObject)
+                if (Physics.Raycast(ray, out hit, Mathf.Infinity, telefragMask) && hit.transform.gameObject != targetTf.gameObject)
                 {
                     break;
                 }

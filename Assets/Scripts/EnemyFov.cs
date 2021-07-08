@@ -5,15 +5,21 @@ using UnityEngine;
 public class EnemyFov : MonoBehaviour
 {
     public Soldier connectedSoldier;
+    public Transform connectedSoldierTf;
     public bool playerInRange;
     private void Start()
     {
-        connectedSoldier = GetComponentInParent<Soldier>();
+        connectedSoldier = connectedSoldierTf.gameObject.GetComponent<Soldier>();
     }
-
+    private void Update()
+    {
+        transform.position = connectedSoldierTf.position + (connectedSoldierTf.forward * 6);
+        transform.rotation = connectedSoldierTf.rotation;
+    }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Player"))
+        
+        if (other.gameObject.GetComponent<PlayerController>() != null)
         {
             connectedSoldier.targetTf = other.transform;
             playerInRange = true;

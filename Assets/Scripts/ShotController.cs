@@ -6,16 +6,23 @@ public class ShotController : MonoBehaviour
 {
     public float shotSpeed;
     public Rigidbody myRb;
+    public bool canKill;
     void Start()
     {
         myRb = GetComponent<Rigidbody>();
         myRb.velocity = transform.forward * shotSpeed;
     }
-    private void OnCollisionEnter(Collision collision)
+
+    private void OnTriggerEnter(Collider other)
     {
-        if (collision.gameObject.CompareTag("Player"))
+        if (other.CompareTag("Player"))
         {
-            collision.gameObject.GetComponent<PlayerController>().isWounded = true;
+            PlayerController playerController = other.GetComponent<PlayerController>();
+            if (playerController.isWounded)
+            {
+                //kill
+            }
+            playerController.isWounded = true;
         }
         Destroy(gameObject);
     }

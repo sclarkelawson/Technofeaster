@@ -12,6 +12,7 @@ public class Grunt : MonoBehaviour, Soldier
     [SerializeField] private SquadController _mySquad;
     [SerializeField] private float _maxAimDistance;
     [SerializeField] private GameObject _bullet;
+    [SerializeField] private GameObject _fovPrefab;
     public SquadController mySquad { get { return _mySquad; } set { _mySquad = value; } }
     public int fear
     {
@@ -23,6 +24,7 @@ public class Grunt : MonoBehaviour, Soldier
     } //get returns fear, set modifies fear and clamps between 0-100
     public float engageTimer { get; set; }
     public float fireDelta { get; set; }
+    public float techSkill { get; set; }
     public float maxAimDistance { get { return _maxAimDistance; } set { _maxAimDistance = value; } }
     public Transform playerTf { get { return _playerTf; } set { _playerTf = value; } }
     public PlayerController playerController { get; set; }
@@ -31,7 +33,12 @@ public class Grunt : MonoBehaviour, Soldier
     public bool isUpgraded { get; set; }
     public bool sightOfPlayer { get; set; }
     public bool firstShot { get; set; }
+    public bool targeted { get; set; }
+
+    public bool openingDoor { get; set; }
+    public Rigidbody myRb { get; set; }
     public GameObject deathEffect { get { return _deathEffect; } set { _deathEffect = value; } }
+    public GameObject fovPrefab { get { return _fovPrefab; } set { _fovPrefab = value; } }
     public SquadController.SoldierType myType { get; set; }
     public SquadController.Goal squadGoal { get; set; }
     public Soldier.SoldierGoal myGoal { get; set; }
@@ -49,7 +56,16 @@ public class Grunt : MonoBehaviour, Soldier
     {
         navAgent = gameObject.GetComponent<NavMeshAgent>();
         playerController = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
-        layerMask = ~LayerMask.GetMask("Transparent FX");
+        layerMask = ~LayerMask.GetMask("TransparentFX", "Shot");
+        myRb = GetComponent<Rigidbody>();
+        myGoal = Soldier.SoldierGoal.FollowSquad;
+        myType = SquadController.SoldierType.Grunt;
+        GameObject tempFov = Instantiate(fovPrefab, transform.position, Quaternion.identity);
+        tempFov.GetComponent<EnemyFov>().connectedSoldierTf = transform;
+        tempFov.GetComponent<EnemyFov>().connectedSoldier = this;
+        firstShot = true;
+        techSkill = 10;
+        openingDoor = false;
         aimLineObject = new GameObject("Line");
         aimLine = aimLineObject.AddComponent<LineRenderer>();
         aimLine.material = new Material(Shader.Find("Legacy Shaders/Particles/Alpha Blended Premultiply"));
@@ -65,20 +81,24 @@ public class Grunt : MonoBehaviour, Soldier
         if (targetTf != null)
         {
             Vector3 rayDirection = targetTf.position - transform.position;
-            if (Physics.Raycast(transform.position, rayDirection, out RaycastHit hit, maxAimDistance))
+            if (Physics.Raycast(transform.position, rayDirection, out RaycastHit hit, maxAimDistance, layerMask))
             {
                 if (hit.transform == targetTf)
                 {
                     sightOfPlayer = true;
                     lastKnownPosition = targetTf.position;
+                    if(myGoal != Soldier.SoldierGoal.Attack)
+                    {
+                        lastGoal = myGoal;
+                    }
                     myGoal = Soldier.SoldierGoal.Attack;
-                    if (mySquad.currentGoal == SquadController.Goal.Hunt)
+                    if (mySquad.goalList.Peek() == SquadController.Goal.Hunt)
                     {
                         engageTimer = 10f;
                     }
-                    else
+                    else if(!playerController.isWounded)
                     {
-                        engageTimer = 10f - (9f / fear + 1);
+                        engageTimer = 10f - (9f / (fear + 1));
                     }
                     mySquad.EvaluateRequest(gameObject, this, SquadController.SoldierRequest.Engaging, lastKnownPosition);
                 }
@@ -88,15 +108,16 @@ public class Grunt : MonoBehaviour, Soldier
                     sightOfPlayer = false;
                 }
             }
-            else
-            {
-                sightOfPlayer = false;
-            }
+            
         }
     }
 
     private void FixedUpdate()
     {
+        if (targeted && fear >= 50)
+        {
+            myGoal = Soldier.SoldierGoal.RequestProtection;
+        }
         switch (myGoal)
         {
             case Soldier.SoldierGoal.Attack:
@@ -106,36 +127,75 @@ public class Grunt : MonoBehaviour, Soldier
                 }
                 else
                 {
-
+                    aimLineObject.SetActive(false);
+                    myGoal = lastGoal;
                 }
-                engageTimer -= Time.deltaTime;
+                engageTimer -= Time.fixedDeltaTime;
                 break;
             case Soldier.SoldierGoal.FollowSquad:
                 FollowSquad();
                 break;
             case Soldier.SoldierGoal.Regroup:
-                Regroup();
+                MoveToSquad();
+                break;
+            case Soldier.SoldierGoal.RequestProtection:
+                Debug.Log("requesting help");
+                mySquad.EvaluateRequest(gameObject, this, SquadController.SoldierRequest.Protect);
                 break;
         }
     }
 
     void FollowSquad()
     {
-        switch (squadGoal)
+        //Debug.Log(currentGoal);
+        switch (mySquad.goalList.Peek())
         {
             case SquadController.Goal.Hunt:
+                MoveToSquad();
                 break;
             case SquadController.Goal.FindServer:
+                MoveToSquad();
                 break;
             case SquadController.Goal.FindArmory:
+                MoveToSquad();
                 break;
             case SquadController.Goal.Resupply:
+                MoveToSquad();
                 break;
             case SquadController.Goal.Regroup:
-                Regroup();
+                Debug.Log("regrouping");
+                MoveToSquad();
                 break;
-            case SquadController.Goal.Search:
-
+            case SquadController.Goal.Search: //if not techie, wait and spin around room
+                RoomDoor targetDoor = mySquad.targetRoom.door;
+                if (mySquad.availableSoldierInRange[SquadController.SoldierType.Techie].Count > 0)
+                {
+                    myRb.velocity = Vector3.zero;
+                    navAgent.isStopped = true;
+                    transform.Rotate(Vector3.up, Time.deltaTime * 60.0f);
+                }
+                else if(!targetDoor.canOpen.Contains(gameObject))
+                {
+                    navAgent.SetDestination(targetDoor.connectedRoom.entrance.position);
+                    navAgent.isStopped = false;
+                    openingDoor = false;
+                }
+                else if(!openingDoor)
+                {
+                    myRb.velocity = Vector3.zero;
+                    navAgent.isStopped = true;
+                    StartCoroutine(OpenDoor(targetDoor));
+                    openingDoor = true;
+                }
+                break;
+            case SquadController.Goal.Protecting: //done
+                if(mySquad.protectTarget != gameObject)
+                {
+                    transform.LookAt(mySquad.protectTarget.transform);
+                }
+                break;
+            default:
+                MoveToSquad();
                 break;
         }
     }
@@ -150,36 +210,53 @@ public class Grunt : MonoBehaviour, Soldier
         {
             Vector3[] positions = new Vector3[2];
             positions[0] = transform.position;
-            positions[1] = playerTf.position;
-            Vector3 fireDirection = positions[1] - positions[0];
+            positions[1] = targetTf.position;
             aimLine.SetPositions(positions);
             aimLineObject.SetActive(true);
-            navAgent.SetDestination(lastKnownPosition);
-            if (playerController.isWounded)
+            if (playerController.isWounded && navAgent.remainingDistance >= 1)
             {
+                navAgent.SetDestination(lastKnownPosition);
+                navAgent.isStopped = true;
+            }
+            else if (playerController.isWounded)
+            {
+                navAgent.SetDestination(lastKnownPosition);
                 navAgent.isStopped = false;
             }
             else
             {
-                transform.forward = fireDirection;
+                myRb.velocity = Vector3.zero;
+                transform.LookAt(targetTf);
                 navAgent.isStopped = true;
             }
-            if (fireDelta <= 0)
-            {
-                Instantiate(bullet, transform.position, Quaternion.Euler(fireDirection));
-                fireDelta = 1.5f;
-            }
-            Debug.Log(fireDelta);
             fireDelta -= Time.deltaTime;
             switch (mySquad.huntOrCapture)
             {
                 case SquadController.HuntOrCapture.Hunt:
                     aimLine.startColor = Color.red;
                     aimLine.endColor = Color.red;
+                    if (fireDelta <= 0)
+                    {
+                        GameObject temp = Instantiate(bullet, transform.position + (transform.forward * 2), transform.rotation);
+                        temp.transform.LookAt(targetTf);
+                        temp.GetComponent<ShotController>().canKill = true;
+                        fireDelta = 1.5f;
+                    }
                     break;
                 case SquadController.HuntOrCapture.Capture:
                     aimLine.startColor = Color.blue;
                     aimLine.endColor = Color.blue;
+                    if (fireDelta <= 0 && !playerController.isWounded)
+                    {
+                        GameObject temp = Instantiate(bullet, transform.position + (transform.forward * 2), transform.rotation);
+                        temp.transform.LookAt(targetTf);
+                        temp.GetComponent<ShotController>().canKill = false;
+                        fireDelta = 1.5f;
+                    }
+                    else if (playerController.isWounded && mySquad.knownRooms[RoomInfo.RoomType.Server].Count <= 0)
+                    {
+
+                    }
                     break;
             }
         }
@@ -192,9 +269,18 @@ public class Grunt : MonoBehaviour, Soldier
         }
 
     }
-    void Regroup()
+    void MoveToSquad()
     {
         navAgent.SetDestination(mySquad.transform.position);
+        if (navAgent.remainingDistance >= 1)
+        {
+            navAgent.isStopped = false;
+        }
+        else
+        {
+            myRb.velocity = Vector3.zero;
+            navAgent.isStopped = true;
+        }
     }
     public void Death() //call RemoveSoldier(), destroy object, instantiate explosion
     {
@@ -210,5 +296,16 @@ public class Grunt : MonoBehaviour, Soldier
         Destroy(aimLineObject);
         Destroy(gameObject);
 
+    }
+
+    public IEnumerator OpenDoor(Door targetDoor)
+    {
+        while(!targetDoor.isOpen)
+        {
+            Debug.Log("opening");
+            targetDoor.Open(techSkill, mySquad);
+            yield return new WaitForSeconds(1f);
+        }
+        mySquad.EvaluateRequest(gameObject, this, SquadController.SoldierRequest.SearchComplete);
     }
 }

@@ -38,6 +38,10 @@ public class PlayerController : MonoBehaviour
             playerRb.velocity = newVelocity;
             transform.forward = moveDirection;
         }
+        else if (lockMove)
+        {
+            playerRb.velocity = Vector3.zero;
+        }
         else
         {
             playerRb.velocity = newVelocity;
