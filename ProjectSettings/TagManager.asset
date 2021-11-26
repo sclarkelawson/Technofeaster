@@ -8,11 +8,12 @@ TagManager:
   - Squad
   - Enemy
   - Transparent
-  - Access Point
   - Camera
   - Decoy
   - Door
   - Interactable
+  - Terrain
+  - AccessPoint
   layers:
   - Default
   - TransparentFX
@@ -25,7 +26,7 @@ TagManager:
   - Lighting
   - Ground
   - Postprocessing
-  - 
+  - Terrain
   - 
   - 
   - 

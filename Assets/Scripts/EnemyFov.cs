@@ -21,14 +21,14 @@ public class EnemyFov : MonoBehaviour
         
         if (other.gameObject.GetComponent<PlayerController>() != null)
         {
-            connectedSoldier.targetTf = other.transform;
+            connectedSoldier.TargetTf = other.transform;
             playerInRange = true;
         }
-        else if((other.gameObject.CompareTag("Decoy") && connectedSoldier.fear >= 20) && (!playerInRange || connectedSoldier.fear >= 70))
+        else if((other.gameObject.CompareTag("Decoy") && connectedSoldier.Fear >= 20) && (!playerInRange || connectedSoldier.Fear >= 70))
         {
-            connectedSoldier.targetTf = other.transform;
+            connectedSoldier.TargetTf = other.transform;
         }
-        else if(connectedSoldier.myGoal == Soldier.SoldierGoal.Regroup || connectedSoldier.mySquad.goalList.Peek() == SquadController.Goal.Regroup)
+        else if(connectedSoldier.MyGoal == Soldier.SoldierGoal.Regroup || connectedSoldier.MySquad.GoalList.Peek() == SquadController.Goal.Regroup)
         {
 
         }

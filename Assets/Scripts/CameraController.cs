@@ -5,12 +5,12 @@ using Cinemachine;
 
 public class CameraController : MonoBehaviour
 {
-    public List<GameObject> cameras;
-    public GameObject currentCamera, fadeToBlackCamera, player;
-    public Transform playerTf;
-    public PlayerAbilitiesController playerAbilitiesController;
-    public PlayerController playerController;
-    public bool changingCameras;
+    public List<GameObject> Cameras;
+    public GameObject CurrentCamera, FadeToBlackCamera, Player;
+    public Transform PlayerTf;
+    public PlayerAbilitiesController PlayerAbilitiesController;
+    public PlayerController PlayerController;
+    public bool ChangingCameras;
     private void Start()
     {
         //GameObject[] camerasTemp = GameObject.FindGameObjectsWithTag("Camera");
@@ -23,7 +23,7 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetAxis("Horizontal") != 0  && !changingCameras)
+        if(Input.GetAxis("Horizontal") != 0  && !ChangingCameras)
         {
             StartCoroutine(ChangeCamera(Input.GetAxis("Horizontal")));
         }
@@ -35,52 +35,52 @@ public class CameraController : MonoBehaviour
 
     IEnumerator ChangeCamera(float direction)
     {
-        changingCameras = true;
+        ChangingCameras = true;
         Debug.Log("Direction: " + direction);
         //fadeToBlackCamera.SetActive(true);
-        int currentIndex = cameras.IndexOf(currentCamera);
+        int currentIndex = Cameras.IndexOf(CurrentCamera);
         int nextIndexDirection = (int)Mathf.Sign(direction);
         Debug.Log("Rounded Direction: " + nextIndexDirection);
         int nextIndex = currentIndex + nextIndexDirection;
-        if (nextIndex >= cameras.Count)
+        if (nextIndex >= Cameras.Count)
         {
             nextIndex = 0;
         }
         else if (nextIndex < 0)
         {
-            nextIndex = cameras.Count - 1;
+            nextIndex = Cameras.Count - 1;
         }
         Debug.Log("Next Index: " + nextIndex);
-        GameObject nextCamera = cameras[nextIndex];
+        GameObject nextCamera = Cameras[nextIndex];
         nextCamera.SetActive(true);
         yield return new WaitForSeconds(1.0f);
-        currentCamera.SetActive(false);
-        currentCamera = nextCamera;
+        CurrentCamera.SetActive(false);
+        CurrentCamera = nextCamera;
         //yield return new WaitForSeconds(1.0f);
         //fadeToBlackCamera.SetActive(false);
-        changingCameras = false;
+        ChangingCameras = false;
     }
 
     IEnumerator ExitCamera()
     {
-        if (currentCamera.GetComponent<CameraInfo>().connectedAccessPoint != null)
+        if (CurrentCamera.GetComponent<CameraInfo>().connectedAccessPoint != null)
         {
-            AccessPointController accessPoint = currentCamera.GetComponent<CameraInfo>().connectedAccessPoint;
-            fadeToBlackCamera.SetActive(true);
+            AccessPointController accessPoint = CurrentCamera.GetComponent<CameraInfo>().connectedAccessPoint;
+            FadeToBlackCamera.SetActive(true);
             yield return new WaitForSeconds(0.1f);
-            currentCamera.SetActive(false);
+            CurrentCamera.SetActive(false);
             yield return new WaitForSeconds(1.0f);
-            player.SetActive(true);
-            player.transform.position = accessPoint.landingTf.position;
+            Player.SetActive(true);
+            Player.transform.position = accessPoint.LandingTf.position;
             this.enabled = false;
-            fadeToBlackCamera.SetActive(false);
-            playerAbilitiesController.tpCam.gameObject.SetActive(true);
+            FadeToBlackCamera.SetActive(false);
+            PlayerAbilitiesController.ThirdPersonCamera.gameObject.SetActive(true);
         }
     }
 
     public void ActivateCams(GameObject newCam)
     {
-        currentCamera = newCam;
+        CurrentCamera = newCam;
         this.enabled = true;
     }
 }

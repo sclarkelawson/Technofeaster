@@ -1,23 +1,22 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AccessPointController : MonoBehaviour
 {
-    public GameObject connectedCamera;
-    public CameraController cameraController;
-    public Transform landingTf;
+    public GameObject ConnectedCamera;
+    public CameraController CameraController;
+    public Transform LandingTf;
 
     public IEnumerator EnterNetwork()
     {
-        cameraController.playerController.isWounded = false;
-        cameraController.fadeToBlackCamera.SetActive(true);
+        CameraController.PlayerController.isWounded = false;
+        CameraController.FadeToBlackCamera.SetActive(true);
         yield return new WaitForSeconds(0.1f);
-        cameraController.playerAbilitiesController.tpCam.gameObject.SetActive(false);
+        CameraController.PlayerAbilitiesController.ThirdPersonCamera.gameObject.SetActive(false);
         yield return new WaitForSeconds(1.0f);
-        connectedCamera.SetActive(true);
-        cameraController.player.SetActive(false);
-        cameraController.fadeToBlackCamera.SetActive(false);
-        cameraController.ActivateCams(connectedCamera);
+        ConnectedCamera.SetActive(true);
+        CameraController.Player.SetActive(false);
+        CameraController.FadeToBlackCamera.SetActive(false);
+        CameraController.ActivateCams(ConnectedCamera);
     }
 }

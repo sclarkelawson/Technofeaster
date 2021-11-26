@@ -1,41 +1,52 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class HallwayDoor : MonoBehaviour, Door
 {
-    public float percentOpen { get; set; }
-    public bool isOpen { get; set; }
-    public List<GameObject> canOpen { get; set; }
-    public Animator animator { get; set; }
+    public float PercentOpen { get; set; }
+    public bool IsOpen { get; set; }
+    public List<GameObject> CanOpen { get; set; }
+    public Animator Animator { get; set; }
     void Start() //Start open
     {
-        percentOpen = 100;
-        animator = gameObject.GetComponentInChildren<Animator>();
-        canOpen = new List<GameObject>();
-        isOpen = true;
+        PercentOpen = 100;
+        Animator = gameObject.GetComponentInChildren<Animator>();
+        CanOpen = new List<GameObject>();
+        IsOpen = true;
     }
     public void Open()
     {
-        animator.Play("open");
-        isOpen = true;
+        Animator.Play("open");
+        IsOpen = true;
     }
     public void Open(float value, SquadController squad)
     {
-        if (percentOpen >= 100)
+        if (PercentOpen >= 100)
         {
-            animator.Play("open");
-            isOpen = true;
+            Animator.Play("open");
+            IsOpen = true;
         }
         else
         {
-            percentOpen += value;
+            PercentOpen += value;
         }
 
     }
     public void Close()
     {
-        animator.Play("close");
-        isOpen = false;
+        Animator.Play("close");
+        IsOpen = false;
+    }
+
+    public void Toggle()
+    {
+        if (IsOpen)
+        {
+            Close();
+        }
+        else
+        {
+            Open();
+        }
     }
 }

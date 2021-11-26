@@ -17,7 +17,7 @@ public class RoomInfo : MonoBehaviour
         myRenderer = GetComponent<Renderer>();
         GameObject activeSquad = GameObject.FindGameObjectWithTag("Squad");
         float distanceToSquad = Vector3.Distance(activeSquad.transform.position, transform.position);
-        specialRoomChance = (100 / activeSquad.GetComponent<SquadController>().uncheckedRooms.Count) * (distanceToSquad / 100);
+        specialRoomChance = (100 / activeSquad.GetComponent<SquadController>().UncheckedRooms.Count) * (distanceToSquad / 100);
         Random.InitState((int)System.DateTime.Now.TimeOfDay.TotalSeconds);
         evaluated = false;
     }
@@ -28,9 +28,9 @@ public class RoomInfo : MonoBehaviour
         {
             return;
         }
-        if (Random.Range(0, 100) >= 100 - (specialRoomChance + squad.roomLuck))
+        if (Random.Range(0, 100) >= 100 - (specialRoomChance + squad.RoomLuck))
         {
-            SquadController.Goal[] tempGoalList = squad.goalList.ToArray();
+            SquadController.Goal[] tempGoalList = squad.GoalList.ToArray();
             Debug.Log(tempGoalList[tempGoalList.Length - 2]);
             switch (tempGoalList[tempGoalList.Length - 2])
             {

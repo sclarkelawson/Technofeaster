@@ -2,30 +2,40 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
+using System.Linq;
+using System;
 
 public class PlayerAbilitiesController : MonoBehaviour
 {
-    public enum TargetType { Enemy, AccessPoint, Door, Interactable }
+    public enum TargetTag { Enemy, AccessPoint, Door, Interactable }
+    public CinemachineFreeLook ThirdPersonCamera;
     WaitForFixedUpdate wait;
-    public CinemachineVirtualCamera telefragCam;
-    public CinemachineTrackedDolly telefragDolly;
-    public CinemachineFreeLook tpCam;
-    public Transform playerCamTf;
-    public float telefragCompletion, accessSpeed;
-    public PlayerController playerController;
-    public GameObject explosionEffect, chargingEffect;
-    public bool bufferComplete;
-    public float raycastBuffer;
-    public TargetType telefragTargetType;
-    private int telefragMask;
+    [SerializeField]
+    private CinemachineVirtualCamera TelefragCam;
+    [SerializeField]
+    private CinemachineTrackedDolly TelefragDolly;
+    [SerializeField]
+    private Transform PlayerCameraTf;
+    [SerializeField]
+    private PlayerController PlayerController;
+    [SerializeField]
+    private GameObject ExplosionEffect, ChargingEffect;
+    [SerializeField]
+    private float RaycastBuffer, AttackDistance, AccessSpeed;
+    [SerializeField]
+    private TargetTag TelefragTargetType;
+    private int _telefragMask, _terrainMask;
 
 
 
     // Start is called before the first frame update
     void Start()
     {
-        telefragDolly = telefragCam.GetCinemachineComponent<CinemachineTrackedDolly>();
-        telefragMask = ~LayerMask.GetMask("Ignore Raycast");
+        TelefragDolly = TelefragCam.GetCinemachineComponent<CinemachineTrackedDolly>();
+        _telefragMask = ~LayerMask.GetMask("Ignore Raycast");
+        _terrainMask = LayerMask.GetMask("Terrain");
+        _targetableTags = System.Enum.GetNames(typeof(TargetTag));
+        _telefragComplete += PlayerAbilitiesController__telefragComplete;
     }
 
     // Update is called once per frame
@@ -38,127 +48,140 @@ public class PlayerAbilitiesController : MonoBehaviour
     {
         if (Input.GetButtonDown("Fire1"))
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            //List<RaycastHit> hits = new List<RaycastHit>(Physics.RaycastAll(ray, 100f, telefragMask));
-            //RaycastHit[] hits = Physics.RaycastAll(ray, 100f, telefragMask);
-            //for (int i = 0; i < hits.Length; i++)
-            //{
-            //    hit = hits[i];
-            //    Transform targetTf = hit.transform;
-            //    string targetTag = hit.transform.gameObject.tag;
-            //    float telefragModifier;
-            //}
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity, telefragMask))
+            GameObject target = null;
+            RaycastHit[] hits = RaycastForward();
+            target = FindFirstTarget(hits);
+            if (target != null)
             {
-                Transform targetTf = hit.transform;
-                string targetTag = hit.transform.gameObject.tag;
                 float telefragModifier;
-                switch (targetTag)
+                switch (target.tag)
                 {
                     case "Enemy":
-                        telefragTargetType = TargetType.Enemy;
-                        telefragModifier = targetTf.gameObject.GetComponent<Soldier>().fear;
-                        StartCoroutine(Telefragging(targetTf, telefragTargetType, hit, telefragModifier));
+                        TelefragTargetType = TargetTag.Enemy;
+                        Soldier targetSoldier = target.GetComponent<Soldier>();
+                        telefragModifier = targetSoldier.Fear;
+                        _targetAction = targetSoldier.Death;
                         break;
-                    case "Access Point":
-                        telefragTargetType = TargetType.AccessPoint;
-                        telefragModifier = accessSpeed;
-                        StartCoroutine(Telefragging(targetTf, telefragTargetType, hit, telefragModifier));
+                    case "AccessPoint":
+                        TelefragTargetType = TargetTag.AccessPoint;
+                        telefragModifier = AccessSpeed;
+                        _targetAction = () => StartCoroutine(target.GetComponent<AccessPointController>().EnterNetwork());
                         break;
                     case "Door":
-                        telefragTargetType = TargetType.Door;
-                        telefragModifier = accessSpeed / 2;
-                        StartCoroutine(Telefragging(targetTf, telefragTargetType, hit, telefragModifier));
+                        TelefragTargetType = TargetTag.Door;
+                        telefragModifier = AccessSpeed / 2;
+                        _targetAction = target.GetComponent<Door>().Toggle;
                         break;
                     case "Interactable":
-                        telefragTargetType = TargetType.Interactable;
-                        telefragModifier = accessSpeed;
-                        StartCoroutine(Telefragging(targetTf, telefragTargetType, hit, telefragModifier));
+                        TelefragTargetType = TargetTag.Interactable;
+                        telefragModifier = AccessSpeed;
+                        _targetAction = target.GetComponent<Interactable>().Toggle;
                         break;
                     default:
+                        telefragModifier = 0f;
+                        _targetAction = null;
                         break;
                 }
+                StartCoroutine(Telefragging(target.transform, TelefragTargetType, telefragModifier));
             }
         }
     }
 
-    IEnumerator Telefragging(Transform targetTf, TargetType telefragTargetType, RaycastHit hit, float telefragModifier)
+    IEnumerator Telefragging(Transform targetTf, TargetTag telefragTargetType, float telefragModifier)
     {
-        playerController.lockMove = true;
-        playerController.lockLook = true;
-        telefragCompletion = 0;
-        CinemachineSmoothPath smoothPath = new GameObject("DollyTrack").AddComponent<CinemachineSmoothPath>();
-        smoothPath.m_Waypoints = new CinemachineSmoothPath.Waypoint[2];
-        smoothPath.m_Waypoints[0] = new CinemachineSmoothPath.Waypoint();
-        smoothPath.m_Waypoints[0].position = playerCamTf.position;
-        smoothPath.m_Waypoints[1] = new CinemachineSmoothPath.Waypoint();
-        telefragDolly.m_Path = smoothPath;
-        telefragDolly.m_PathPosition = 0;
-        telefragDolly.m_AutoDolly.m_Enabled = false;
-        telefragCam.m_LookAt = targetTf.transform;
-        telefragCam.gameObject.SetActive(true);
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        PlayerController.lockMove = true;
+        PlayerController.lockLook = true;
+        _telefragCompletion = 0;
+        CinemachineSmoothPath smoothPath = CreateNewSmoothPath();
+        PrepareDollyTrackAndCamera(smoothPath, targetTf);
         StartCoroutine(RaycastBufferTime());
         //Play charging sound
         //GameObject chargingEffectInstance = Instantiate(chargingEffect, target.position, target.rotation);
         while (Input.GetButton("Fire1"))
         {
-            if (bufferComplete)
+            if (_bufferComplete)
             {
-                if (Physics.Raycast(ray, out hit, Mathf.Infinity, telefragMask) && hit.transform.gameObject != targetTf.gameObject)
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                if (Physics.Raycast(ray, out RaycastHit hit, _terrainMask))
                 {
-                    break;
+                    if((hit.point.magnitude - transform.position.magnitude) < (targetTf.position.magnitude - transform.position.magnitude))
+                    {
+                        break;
+                    }
                 }
             }
-            if (telefragCompletion >= 100)
+            if (_telefragCompletion >= 100)
             {
                 break;
             }
             smoothPath.m_Waypoints[1].position = targetTf.position;
-            telefragDolly.m_PathPosition = Mathf.Clamp(smoothPath.MaxPos * ((telefragCompletion - 20) / 100), 0, smoothPath.MaxPos * 0.8f);
-            telefragCompletion += (50 * (telefragModifier / 100)) * Time.deltaTime;
+            TelefragDolly.m_PathPosition = Mathf.Clamp(smoothPath.MaxPos * ((_telefragCompletion - 20) / 100), 0, smoothPath.MaxPos * 0.8f);
+            _telefragCompletion += (50 * (telefragModifier / 100)) * Time.deltaTime;
             yield return wait;
         }
-        telefragCam.gameObject.SetActive(false);
-        if (telefragTargetType == TargetType.Enemy && telefragCompletion >= 100)
+        TelefragCam.gameObject.SetActive(false);
+        if(_telefragCompletion >= 100)
         {
-            targetTf.gameObject.GetComponent<Soldier>().Death();
-            transform.position = targetTf.position;
-        }
-        else if (telefragTargetType == TargetType.AccessPoint && telefragCompletion >= 100)
-        {
-            StartCoroutine(targetTf.gameObject.GetComponent<AccessPointController>().EnterNetwork());
-            //play effect on player
-        }
-        else if (telefragTargetType == TargetType.Door && telefragCompletion >= 100)
-        {
-            Door targetDoor = targetTf.gameObject.GetComponent<Door>();
-            if (!targetDoor.isOpen)
-            {
-                targetDoor.Open();
-            }
-            else
-            {
-                targetDoor.Close();
-            }
-        }
-        else if (telefragTargetType == TargetType.Interactable && telefragCompletion >= 100)
-        {
-            targetTf.gameObject.GetComponent<Interactable>().Toggle();
+            _telefragComplete?.Invoke(this, EventArgs.Empty);
         }
         //Destroy(chargingEffectInstance);
         //End charging sound
-        playerController.lockMove = false;
-        playerController.lockLook = false;
+        PlayerController.lockMove = false;
+        PlayerController.lockLook = false;
         Destroy(smoothPath.gameObject);
 
     }
 
-    IEnumerator RaycastBufferTime()
+    private void PlayerAbilitiesController__telefragComplete(object sender, EventArgs e)
     {
-        yield return new WaitForSeconds(raycastBuffer);
-        bufferComplete = true;
+        _targetAction();
     }
 
+    private RaycastHit[] RaycastForward()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit[] hits = Physics.RaycastAll(ray, AttackDistance, _telefragMask);
+        return hits.OrderBy(c => c.distance).ToArray();
+    }
+    private GameObject FindFirstTarget(RaycastHit[] hits)
+    {
+        foreach (RaycastHit hit in hits)
+        {
+            Transform hitTf = hit.transform;
+            if (_targetableTags.Contains(hitTf.tag))
+            {
+                return hitTf.gameObject;
+            }
+        }
+        return null;
+    }
+    CinemachineSmoothPath CreateNewSmoothPath()
+    {
+        CinemachineSmoothPath smoothPath = new GameObject("DollyTrack").AddComponent<CinemachineSmoothPath>();
+        smoothPath.m_Waypoints = new CinemachineSmoothPath.Waypoint[2];
+        smoothPath.m_Waypoints[0] = new CinemachineSmoothPath.Waypoint();
+        smoothPath.m_Waypoints[0].position = PlayerCameraTf.position;
+        smoothPath.m_Waypoints[1] = new CinemachineSmoothPath.Waypoint();
+        return smoothPath;
+    }
+    void PrepareDollyTrackAndCamera(CinemachineSmoothPath smoothPath, Transform target)
+    {
+        TelefragDolly.m_Path = smoothPath;
+        TelefragDolly.m_PathPosition = 0;
+        TelefragDolly.m_AutoDolly.m_Enabled = false;
+        TelefragCam.m_LookAt = target;
+        TelefragCam.gameObject.SetActive(true);
+    }
+
+    IEnumerator RaycastBufferTime()
+    {
+        yield return new WaitForSeconds(RaycastBuffer);
+        _bufferComplete = true;
+    }
+
+    private float _telefragCompletion;
+    private bool _bufferComplete;
+    private string[] _targetableTags;
+    private event EventHandler _telefragComplete;
+    private Action _targetAction;
 }

@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -14,158 +13,158 @@ public class SquadController : MonoBehaviour
 
     #region variables
     //public Goal currentGoal, previousGoal;
-    public Stack<Goal> goalList;
-    public List<GameObject> soldiersInSquad;
-    public List<GameObject> soldiersInRange;
-    public float squadSize, protectExpireTimer, averageFear, roomLuck, timer, wanderTimer, wanderRadius;
-    public Dictionary<SoldierType, List<GameObject>> availableSoldierInRange;
+    public Stack<Goal> GoalList;
+    public List<GameObject> SoldiersInSquad;
+    public List<GameObject> SoldiersInRange;
+    public float SquadSize, ProtectExpireTimer, AverageFear, RoomLuck, Timer, WanderTimer, WanderRadius;
+    public Dictionary<SoldierType, List<GameObject>> AvailableSoldierInRange;
     //[SerializeField] private GameObject squadPrefab;
-    public bool isGoalComplete, sentGoal;
-    public GameObject protectTarget;
-    public Soldier engagingSoldier;
-    public List<RoomInfo> allRooms;
-    public List<RoomInfo> uncheckedRooms;
-    public Dictionary<RoomInfo.RoomType, List<RoomInfo>> knownRooms;
+    public bool IsGoalComplete, SentGoal;
+    public GameObject ProtectTarget;
+    public Soldier EngagingSoldier;
+    public List<RoomInfo> AllRooms;
+    public List<RoomInfo> UncheckedRooms;
+    public Dictionary<RoomInfo.RoomType, List<RoomInfo>> KnownRooms;
     //public List<FormationInfo> formationPositions;
-    public RoomInfo targetRoom;
+    public RoomInfo TargetRoom;
     public HuntOrCapture huntOrCapture;
-    public Vector3 lastKnownPosition, regroupPosition;
+    public Vector3 LastKnownPosition, RegroupPosition;
     public NavMeshAgent myAgent;
     #endregion
 
     void Start()
     {
-        uncheckedRooms = new List<RoomInfo>(allRooms);
-        sentGoal = false;
-        availableSoldierInRange = new Dictionary<SoldierType, List<GameObject>>();
-        knownRooms = new Dictionary<RoomInfo.RoomType, List<RoomInfo>>();
+        UncheckedRooms = new List<RoomInfo>(AllRooms);
+        SentGoal = false;
+        AvailableSoldierInRange = new Dictionary<SoldierType, List<GameObject>>();
+        KnownRooms = new Dictionary<RoomInfo.RoomType, List<RoomInfo>>();
         for (int i = 0; i < 4; i++)
         {
-            availableSoldierInRange.Add((SoldierType)i, new List<GameObject>());
+            AvailableSoldierInRange.Add((SoldierType)i, new List<GameObject>());
         }
         for (int i = 0; i < 3; i++)
         {
-            knownRooms.Add((RoomInfo.RoomType)i, new List<RoomInfo>());
+            KnownRooms.Add((RoomInfo.RoomType)i, new List<RoomInfo>());
         }
-        targetRoom = SelectRandomRoom(false);
-        goalList = new Stack<Goal>();
-        goalList.Push(Goal.FindServer);
-        myAgent.SetDestination(targetRoom.entrance.position);
-        timer = wanderTimer;
+        TargetRoom = SelectRandomRoom(false);
+        GoalList = new Stack<Goal>();
+        GoalList.Push(Goal.FindServer);
+        myAgent.SetDestination(TargetRoom.entrance.position);
+        Timer = WanderTimer;
         EvaluateSize();
     }
     void Update()
     {
         
-        switch (goalList.Peek())
+        switch (GoalList.Peek())
         {
             case Goal.Hunt:
-                if (availableSoldierInRange[SoldierType.Techie].Count == 0 && soldiersInRange.Count != soldiersInSquad.Count)
+                if (AvailableSoldierInRange[SoldierType.Techie].Count == 0 && SoldiersInRange.Count != SoldiersInSquad.Count)
                 {
-                    goalList.Push(Goal.Regroup);
+                    GoalList.Push(Goal.Regroup);
                     break;
                 }
-                timer += Time.deltaTime;
-                if (timer >= wanderTimer)
+                Timer += Time.deltaTime;
+                if (Timer >= WanderTimer)
                 {
-                    Vector3 newPos = RandomNavSphere(transform.position, wanderRadius, -1);
+                    Vector3 newPos = RandomNavSphere(transform.position, WanderRadius, -1);
                     myAgent.SetDestination(newPos);
-                    timer = 0;
+                    Timer = 0;
                 }
                 break;
             case Goal.FindServer: //done
-                if (isGoalComplete)
+                if (IsGoalComplete)
                 {
                     Debug.Log("Goal complete");
-                    if (knownRooms[RoomInfo.RoomType.Server].Count > 0)
+                    if (KnownRooms[RoomInfo.RoomType.Server].Count > 0)
                     {
-                        goalList.Clear();
-                        goalList.Push(Goal.Hunt);
+                        GoalList.Clear();
+                        GoalList.Push(Goal.Hunt);
                         EvaluateSize();
                     }
                     else
                     {
-                        roomLuck += 50 / allRooms.Count;
-                        targetRoom = SelectRandomRoom(false);
-                        if (targetRoom == null)
+                        RoomLuck += 50 / AllRooms.Count;
+                        TargetRoom = SelectRandomRoom(false);
+                        if (TargetRoom == null)
                         {
                             Debug.Log("hunting");
-                            goalList.Clear();
-                            goalList.Push(Goal.Hunt);
+                            GoalList.Clear();
+                            GoalList.Push(Goal.Hunt);
                             EvaluateSize();
                             break;
                         }
-                        myAgent.SetDestination(targetRoom.entrance.position);
-                        isGoalComplete = false;
+                        myAgent.SetDestination(TargetRoom.entrance.position);
+                        IsGoalComplete = false;
                     }
                 }
                 myAgent.isStopped = false;
                 if(myAgent.remainingDistance <= 0.1f)
                 {
-                    goalList.Push(Goal.Search);
-                    isGoalComplete = false;
+                    GoalList.Push(Goal.Search);
+                    IsGoalComplete = false;
                 }
                 break;
             case Goal.FindArmory: //done
-                if (isGoalComplete)
+                if (IsGoalComplete)
                 {
-                    if (knownRooms[RoomInfo.RoomType.Armory].Count > 0)
+                    if (KnownRooms[RoomInfo.RoomType.Armory].Count > 0)
                     {
-                        goalList.Clear();
-                        goalList.Push(Goal.Hunt);
+                        GoalList.Clear();
+                        GoalList.Push(Goal.Hunt);
                         EvaluateSize();
                     }
                     else
                     {
-                        targetRoom = SelectRandomRoom(false);
-                        if(targetRoom == null)
+                        TargetRoom = SelectRandomRoom(false);
+                        if(TargetRoom == null)
                         {
-                            goalList.Clear();
-                            goalList.Push(Goal.Hunt);
+                            GoalList.Clear();
+                            GoalList.Push(Goal.Hunt);
                             EvaluateSize();
                             break;
                         }
-                        myAgent.SetDestination(targetRoom.entrance.position);
-                        isGoalComplete = false;
+                        myAgent.SetDestination(TargetRoom.entrance.position);
+                        IsGoalComplete = false;
                     }
                 }
                 myAgent.isStopped = false;
                 if (myAgent.remainingDistance <= 0.1f)
                 {
-                    goalList.Push(Goal.FindArmory);
-                    isGoalComplete = false;
+                    GoalList.Push(Goal.FindArmory);
+                    IsGoalComplete = false;
                 }
                 break;
             case Goal.Resupply:
                 break;
             case Goal.Search: //done
-                if (isGoalComplete)
+                if (IsGoalComplete)
                 {
                     Debug.Log("pop Search");
-                    goalList.Pop();
+                    GoalList.Pop();
                 }
                 myAgent.isStopped = true;
                 EvaluateSize();
                 break;
             case Goal.ToTarget: //done
-                myAgent.SetDestination(engagingSoldier.lastKnownPosition);
+                myAgent.SetDestination(EngagingSoldier.LastKnownPosition);
                 myAgent.isStopped = false;
-                if(engagingSoldier.engageTimer <= 0)
+                if(EngagingSoldier.EngageTimer <= 0)
                 {
-                    goalList.Pop();
+                    GoalList.Pop();
                 }
                 break;
             case Goal.Protecting: //done
-                if(protectExpireTimer <= 0)
+                if(ProtectExpireTimer <= 0)
                 {
-                    goalList.Pop();
+                    GoalList.Pop();
                 }
-                protectExpireTimer -= Time.deltaTime;
+                ProtectExpireTimer -= Time.deltaTime;
                 break;
             case Goal.Regroup: //done
-                if ((soldiersInRange.Count / soldiersInSquad.Count) >= 0.75f)
+                if ((SoldiersInRange.Count / SoldiersInSquad.Count) >= 0.75f)
                 {
-                    goalList.Pop();
+                    GoalList.Pop();
                 }
                 break;
         }
@@ -174,19 +173,19 @@ public class SquadController : MonoBehaviour
     {
         for (int i = 0; i < 4; i++)
         {
-            availableSoldierInRange[(SoldierType)i].Clear();
+            AvailableSoldierInRange[(SoldierType)i].Clear();
         }
-        for (int i = 0; i < soldiersInRange.Count; i++)
+        for (int i = 0; i < SoldiersInRange.Count; i++)
         {
-            availableSoldierInRange[soldiersInRange[i].GetComponent<Soldier>().myType].Add(soldiersInRange[i].gameObject);
+            AvailableSoldierInRange[SoldiersInRange[i].GetComponent<Soldier>().MyType].Add(SoldiersInRange[i].gameObject);
         }
         float tempFear = 0;
-        for (int i = 0; i < soldiersInSquad.Count; i++)
+        for (int i = 0; i < SoldiersInSquad.Count; i++)
         {
-            tempFear += soldiersInSquad[i].GetComponent<Soldier>().fear;
+            tempFear += SoldiersInSquad[i].GetComponent<Soldier>().Fear;
         }
-        tempFear /= soldiersInSquad.Count;
-        averageFear = tempFear;
+        tempFear /= SoldiersInSquad.Count;
+        AverageFear = tempFear;
         //if (1 >= 1)
         //{
         //    huntOrCapture = HuntOrCapture.Capture;
@@ -207,17 +206,17 @@ public class SquadController : MonoBehaviour
         switch (request)
         {
             case SoldierRequest.Engaging:
-                lastKnownPosition = targetPosition;
-                engagingSoldier = requesterSoldier;
-                if (soldiersInRange.Contains(requester) && goalList.Peek() != Goal.ToTarget)
+                LastKnownPosition = targetPosition;
+                EngagingSoldier = requesterSoldier;
+                if (SoldiersInRange.Contains(requester) && GoalList.Peek() != Goal.ToTarget)
                 {
-                    goalList.Push(Goal.ToTarget);
+                    GoalList.Push(Goal.ToTarget);
                 }
                 break;
             case SoldierRequest.Distracted:
-                if(soldiersInRange.Contains(requester) && averageFear >= 20)
+                if(SoldiersInRange.Contains(requester) && AverageFear >= 20)
                 {
-                    lastKnownPosition = targetPosition;
+                    LastKnownPosition = targetPosition;
                 }
                 break;
         }
@@ -228,38 +227,38 @@ public class SquadController : MonoBehaviour
         switch (request)
         {
             case SoldierRequest.Protect: //done
-                if (soldiersInRange.Contains(requester) || goalList.Peek() == Goal.Hunt)
+                if (SoldiersInRange.Contains(requester) || GoalList.Peek() == Goal.Hunt)
                 {
-                    protectTarget = requester;
-                    if (goalList.Peek() != Goal.Protecting)
+                    ProtectTarget = requester;
+                    if (GoalList.Peek() != Goal.Protecting)
                     {
-                        goalList.Push(Goal.Protecting);
+                        GoalList.Push(Goal.Protecting);
                     }
-                    protectExpireTimer = 3.0f;
+                    ProtectExpireTimer = 3.0f;
                 }
                 break;
             case SoldierRequest.ReachedRoom:
-                goalList.Push(Goal.Search);
+                GoalList.Push(Goal.Search);
                 break;
             case SoldierRequest.SearchComplete:
-                if(goalList.Peek() == Goal.Search)
+                if(GoalList.Peek() == Goal.Search)
                 {
-                    knownRooms[targetRoom.myType].Add(targetRoom);
-                    Debug.Log("removing " + targetRoom.gameObject.name);
-                    uncheckedRooms.Remove(targetRoom);
-                    isGoalComplete = true;
+                    KnownRooms[TargetRoom.myType].Add(TargetRoom);
+                    Debug.Log("removing " + TargetRoom.gameObject.name);
+                    UncheckedRooms.Remove(TargetRoom);
+                    IsGoalComplete = true;
                 }
                 break;
         }
     }
     void EvaluateSize() //done, untested
     {
-        squadSize = Mathf.Clamp(soldiersInRange.Count * 3.5f, 5f, 21f);
-        transform.localScale = new Vector3(squadSize, 3, squadSize);
-        if ((soldiersInRange.Count / soldiersInSquad.Count) <= 0.5f)
+        SquadSize = Mathf.Clamp(SoldiersInRange.Count * 3.5f, 5f, 21f);
+        transform.localScale = new Vector3(SquadSize, 3, SquadSize);
+        if ((SoldiersInRange.Count / SoldiersInSquad.Count) <= 0.5f)
         {
-            sentGoal = false;
-            goalList.Push(Goal.Regroup);
+            SentGoal = false;
+            GoalList.Push(Goal.Regroup);
         }
     }
     public static Vector3 RandomNavSphere(Vector3 origin, float dist, int layermask) //https://forum.unity.com/threads/solved-random-wander-ai-using-navmesh.327950/
@@ -276,23 +275,23 @@ public class SquadController : MonoBehaviour
     }
     void SendGoal(Goal goal)
     {
-        for (int i = 0; i < soldiersInSquad.Count; i++)
+        for (int i = 0; i < SoldiersInSquad.Count; i++)
         {
-            if (!soldiersInRange.Contains(soldiersInSquad[i]))
+            if (!SoldiersInRange.Contains(SoldiersInSquad[i]))
             {
-                soldiersInSquad[i].GetComponent<Soldier>().squadGoal = Goal.Regroup;
+                SoldiersInSquad[i].GetComponent<Soldier>().SquadGoal = Goal.Regroup;
             }
         }
     }
     RoomInfo SelectRandomRoom(bool includeChecked) //done, untested
     {
-        if(!includeChecked && uncheckedRooms.Count > 0)
+        if(!includeChecked && UncheckedRooms.Count > 0)
         {
-            return uncheckedRooms[Random.Range(0, uncheckedRooms.Count)];
+            return UncheckedRooms[Random.Range(0, UncheckedRooms.Count)];
         }
         else if (includeChecked)
         {
-            return allRooms[Random.Range(0, uncheckedRooms.Count)];
+            return AllRooms[Random.Range(0, UncheckedRooms.Count)];
         }
         return null;
     }
@@ -300,23 +299,23 @@ public class SquadController : MonoBehaviour
     {
         if (includeChecked)
         {
-            uncheckedRooms.Sort(delegate (RoomInfo a, RoomInfo b)
+            UncheckedRooms.Sort(delegate (RoomInfo a, RoomInfo b)
             {
                 return (start - a.transform.position).sqrMagnitude
                 .CompareTo(
                   (start - b.transform.position).sqrMagnitude);
             }); //https://answers.unity.com/questions/341065/sort-a-list-of-gameobjects-by-distance.html
-            return allRooms[0];
+            return AllRooms[0];
         }
         else
         {
-            uncheckedRooms.Sort(delegate (RoomInfo a, RoomInfo b)
+            UncheckedRooms.Sort(delegate (RoomInfo a, RoomInfo b)
             {
                 return (start - a.transform.position).sqrMagnitude
                 .CompareTo(
                   (start - b.transform.position).sqrMagnitude);
             }); //https://answers.unity.com/questions/341065/sort-a-list-of-gameobjects-by-distance.html
-            return uncheckedRooms[0];
+            return UncheckedRooms[0];
         }
         
     }
@@ -336,18 +335,18 @@ public class SquadController : MonoBehaviour
     } //https://forum.unity.com/threads/getting-the-distance-in-nav-mesh.315846/
     private void OnTriggerEnter(Collider other) //done, untested
     {
-        if (!soldiersInRange.Contains(other.gameObject) && other.CompareTag("Enemy"))
+        if (!SoldiersInRange.Contains(other.gameObject) && other.CompareTag("Enemy"))
         {
             Soldier newSoldier = other.GetComponent<Soldier>();
-            newSoldier.isIsolated = false;
-            newSoldier.fear -= 5;
-            soldiersInRange.Add(other.gameObject);
+            newSoldier.IsIsolated = false;
+            newSoldier.Fear -= 5;
+            SoldiersInRange.Add(other.gameObject);
             EvaluateSize();
         }
     }
     private void OnTriggerExit(Collider other) //done, untested
     {
-        if (soldiersInRange.Contains(other.gameObject)) //find path to target, if too far remove from squad and create new squad
+        if (SoldiersInRange.Contains(other.gameObject)) //find path to target, if too far remove from squad and create new squad
         {
             Soldier newSoldier = other.GetComponent<Soldier>();
             NavMeshPath path = new NavMeshPath();
@@ -355,11 +354,11 @@ public class SquadController : MonoBehaviour
             {
                 if (GetPathLength(path) > 5f)
                 {
-                    newSoldier.isIsolated = true;
-                    newSoldier.fear += 10;
+                    newSoldier.IsIsolated = true;
+                    newSoldier.Fear += 10;
                 }
             }
-            soldiersInRange.Remove(other.gameObject);
+            SoldiersInRange.Remove(other.gameObject);
             EvaluateSize();
         }
     }

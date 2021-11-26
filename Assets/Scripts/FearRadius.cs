@@ -16,7 +16,7 @@ public class FearRadius : MonoBehaviour
         if(other.GetComponent<Soldier>() != null)
         {
             Soldier targetSoldier = other.GetComponent<Soldier>();
-            targetSoldier.fear += fear;
+            targetSoldier.Fear += fear;
         }
     }
 }

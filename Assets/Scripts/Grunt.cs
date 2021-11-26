@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -13,8 +12,8 @@ public class Grunt : MonoBehaviour, Soldier
     [SerializeField] private float _maxAimDistance;
     [SerializeField] private GameObject _bullet;
     [SerializeField] private GameObject _fovPrefab;
-    public SquadController mySquad { get { return _mySquad; } set { _mySquad = value; } }
-    public int fear
+    public SquadController MySquad { get { return _mySquad; } set { _mySquad = value; } }
+    public int Fear
     {
         get { return _fear; }
         set
@@ -22,90 +21,90 @@ public class Grunt : MonoBehaviour, Soldier
             _fear = Mathf.Clamp(value, 0, 100);
         }
     } //get returns fear, set modifies fear and clamps between 0-100
-    public float engageTimer { get; set; }
-    public float fireDelta { get; set; }
-    public float techSkill { get; set; }
-    public float maxAimDistance { get { return _maxAimDistance; } set { _maxAimDistance = value; } }
-    public Transform playerTf { get { return _playerTf; } set { _playerTf = value; } }
-    public PlayerController playerController { get; set; }
-    public Vector3 lastKnownPosition { get; set; }
-    public bool isIsolated { get; set; }
-    public bool isUpgraded { get; set; }
-    public bool sightOfPlayer { get; set; }
-    public bool firstShot { get; set; }
-    public bool targeted { get; set; }
+    public float EngageTimer { get; set; }
+    public float FireDelta { get; set; }
+    public float TechSkill { get; set; }
+    public float MaxAimDistance { get { return _maxAimDistance; } set { _maxAimDistance = value; } }
+    public Transform PlayerTf { get { return _playerTf; } set { _playerTf = value; } }
+    public PlayerController PlayerController { get; set; }
+    public Vector3 LastKnownPosition { get; set; }
+    public bool IsIsolated { get; set; }
+    public bool IsUpgraded { get; set; }
+    public bool SightOfPlayer { get; set; }
+    public bool FirstShot { get; set; }
+    public bool Targeted { get; set; }
 
-    public bool openingDoor { get; set; }
-    public Rigidbody myRb { get; set; }
-    public GameObject deathEffect { get { return _deathEffect; } set { _deathEffect = value; } }
-    public GameObject fovPrefab { get { return _fovPrefab; } set { _fovPrefab = value; } }
-    public SquadController.SoldierType myType { get; set; }
-    public SquadController.Goal squadGoal { get; set; }
-    public Soldier.SoldierGoal myGoal { get; set; }
-    public Soldier.SoldierGoal lastGoal { get; set; }
-    public NavMeshAgent navAgent { get; set; }
-    public LineRenderer aimLine { get; set; }
-    public GameObject aimLineObject { get; set; }
-    public GameObject bullet { get { return _bullet; } set { _bullet = value; } }
-    public Transform targetTf { get; set; }
-    public Transform formationTf { get; set; }
-    public int layerMask { get; set; }
+    public bool OpeningDoor { get; set; }
+    public Rigidbody MyRb { get; set; }
+    public GameObject DeathEffect { get { return _deathEffect; } set { _deathEffect = value; } }
+    public GameObject FovPrefab { get { return _fovPrefab; } set { _fovPrefab = value; } }
+    public SquadController.SoldierType MyType { get; set; }
+    public SquadController.Goal SquadGoal { get; set; }
+    public Soldier.SoldierGoal MyGoal { get; set; }
+    public Soldier.SoldierGoal LastGoal { get; set; }
+    public NavMeshAgent NavAgent { get; set; }
+    public LineRenderer AimLine { get; set; }
+    public GameObject AimLineObject { get; set; }
+    public GameObject Bullet { get { return _bullet; } set { _bullet = value; } }
+    public Transform TargetTf { get; set; }
+    public Transform FormationTf { get; set; }
+    public int LayerMask { get; set; }
     #endregion
 
     private void Start()
     {
-        navAgent = gameObject.GetComponent<NavMeshAgent>();
-        playerController = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
-        layerMask = ~LayerMask.GetMask("TransparentFX", "Shot");
-        myRb = GetComponent<Rigidbody>();
-        myGoal = Soldier.SoldierGoal.FollowSquad;
-        myType = SquadController.SoldierType.Grunt;
-        GameObject tempFov = Instantiate(fovPrefab, transform.position, Quaternion.identity);
+        NavAgent = gameObject.GetComponent<NavMeshAgent>();
+        PlayerController = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
+        LayerMask = ~UnityEngine.LayerMask.GetMask("TransparentFX", "Shot");
+        MyRb = GetComponent<Rigidbody>();
+        MyGoal = Soldier.SoldierGoal.FollowSquad;
+        MyType = SquadController.SoldierType.Grunt;
+        GameObject tempFov = Instantiate(FovPrefab, transform.position, Quaternion.identity);
         tempFov.GetComponent<EnemyFov>().connectedSoldierTf = transform;
         tempFov.GetComponent<EnemyFov>().connectedSoldier = this;
-        firstShot = true;
-        techSkill = 10;
-        openingDoor = false;
-        aimLineObject = new GameObject("Line");
-        aimLine = aimLineObject.AddComponent<LineRenderer>();
-        aimLine.material = new Material(Shader.Find("Legacy Shaders/Particles/Alpha Blended Premultiply"));
-        aimLine.positionCount = 2;
-        aimLineObject.SetActive(false);
-        aimLine.startWidth = 0.1f;
-        aimLine.endWidth = 0.1f;
-        aimLine.startColor = Color.red;
-        aimLine.endColor = Color.red;
+        FirstShot = true;
+        TechSkill = 10;
+        OpeningDoor = false;
+        AimLineObject = new GameObject("Line");
+        AimLine = AimLineObject.AddComponent<LineRenderer>();
+        AimLine.material = new Material(Shader.Find("Legacy Shaders/Particles/Alpha Blended Premultiply"));
+        AimLine.positionCount = 2;
+        AimLineObject.SetActive(false);
+        AimLine.startWidth = 0.1f;
+        AimLine.endWidth = 0.1f;
+        AimLine.startColor = Color.red;
+        AimLine.endColor = Color.red;
     }
     private void Update()
     {
-        if (targetTf != null)
+        if (TargetTf != null)
         {
-            Vector3 rayDirection = targetTf.position - transform.position;
-            if (Physics.Raycast(transform.position, rayDirection, out RaycastHit hit, maxAimDistance, layerMask))
+            Vector3 rayDirection = TargetTf.position - transform.position;
+            if (Physics.Raycast(transform.position, rayDirection, out RaycastHit hit, MaxAimDistance, LayerMask))
             {
-                if (hit.transform == targetTf)
+                if (hit.transform == TargetTf)
                 {
-                    sightOfPlayer = true;
-                    lastKnownPosition = targetTf.position;
-                    if(myGoal != Soldier.SoldierGoal.Attack)
+                    SightOfPlayer = true;
+                    LastKnownPosition = TargetTf.position;
+                    if(MyGoal != Soldier.SoldierGoal.Attack)
                     {
-                        lastGoal = myGoal;
+                        LastGoal = MyGoal;
                     }
-                    myGoal = Soldier.SoldierGoal.Attack;
-                    if (mySquad.goalList.Peek() == SquadController.Goal.Hunt)
+                    MyGoal = Soldier.SoldierGoal.Attack;
+                    if (MySquad.GoalList.Peek() == SquadController.Goal.Hunt)
                     {
-                        engageTimer = 10f;
+                        EngageTimer = 10f;
                     }
-                    else if(!playerController.isWounded)
+                    else if(!PlayerController.isWounded)
                     {
-                        engageTimer = 10f - (9f / (fear + 1));
+                        EngageTimer = 10f - (9f / (Fear + 1));
                     }
-                    mySquad.EvaluateRequest(gameObject, this, SquadController.SoldierRequest.Engaging, lastKnownPosition);
+                    MySquad.EvaluateRequest(gameObject, this, SquadController.SoldierRequest.Engaging, LastKnownPosition);
                 }
                 else
                 {
-                    firstShot = true;
-                    sightOfPlayer = false;
+                    FirstShot = true;
+                    SightOfPlayer = false;
                 }
             }
             
@@ -114,23 +113,23 @@ public class Grunt : MonoBehaviour, Soldier
 
     private void FixedUpdate()
     {
-        if (targeted && fear >= 50)
+        if (Targeted && Fear >= 50)
         {
-            myGoal = Soldier.SoldierGoal.RequestProtection;
+            MyGoal = Soldier.SoldierGoal.RequestProtection;
         }
-        switch (myGoal)
+        switch (MyGoal)
         {
             case Soldier.SoldierGoal.Attack:
-                if (engageTimer > 0)
+                if (EngageTimer > 0)
                 {
                     Attack();
                 }
                 else
                 {
-                    aimLineObject.SetActive(false);
-                    myGoal = lastGoal;
+                    AimLineObject.SetActive(false);
+                    MyGoal = LastGoal;
                 }
-                engageTimer -= Time.fixedDeltaTime;
+                EngageTimer -= Time.fixedDeltaTime;
                 break;
             case Soldier.SoldierGoal.FollowSquad:
                 FollowSquad();
@@ -140,7 +139,7 @@ public class Grunt : MonoBehaviour, Soldier
                 break;
             case Soldier.SoldierGoal.RequestProtection:
                 Debug.Log("requesting help");
-                mySquad.EvaluateRequest(gameObject, SquadController.SoldierRequest.Protect);
+                MySquad.EvaluateRequest(gameObject, SquadController.SoldierRequest.Protect);
                 break;
         }
     }
@@ -148,7 +147,7 @@ public class Grunt : MonoBehaviour, Soldier
     void FollowSquad()
     {
         //Debug.Log(currentGoal);
-        switch (mySquad.goalList.Peek())
+        switch (MySquad.GoalList.Peek())
         {
             case SquadController.Goal.Hunt:
                 MoveToSquad();
@@ -167,31 +166,31 @@ public class Grunt : MonoBehaviour, Soldier
 
                 break;
             case SquadController.Goal.Search: //if not techie, wait and spin around room
-                RoomDoor targetDoor = mySquad.targetRoom.door;
-                if (mySquad.availableSoldierInRange[SquadController.SoldierType.Techie].Count > 0)
+                RoomDoor targetDoor = MySquad.TargetRoom.door;
+                if (MySquad.AvailableSoldierInRange[SquadController.SoldierType.Techie].Count > 0)
                 {
-                    myRb.velocity = Vector3.zero;
-                    navAgent.isStopped = true;
+                    MyRb.velocity = Vector3.zero;
+                    NavAgent.isStopped = true;
                     transform.Rotate(Vector3.up, Time.deltaTime * 60.0f);
                 }
-                else if(!targetDoor.canOpen.Contains(gameObject))
+                else if(!targetDoor.CanOpen.Contains(gameObject))
                 {
-                    navAgent.SetDestination(targetDoor.connectedRoom.entrance.position);
-                    navAgent.isStopped = false;
-                    openingDoor = false;
+                    NavAgent.SetDestination(targetDoor.ConnectedRoom.entrance.position);
+                    NavAgent.isStopped = false;
+                    OpeningDoor = false;
                 }
-                else if(!openingDoor)
+                else if(!OpeningDoor)
                 {
-                    myRb.velocity = Vector3.zero;
-                    navAgent.isStopped = true;
+                    MyRb.velocity = Vector3.zero;
+                    NavAgent.isStopped = true;
                     StartCoroutine(OpenDoor(targetDoor));
-                    openingDoor = true;
+                    OpeningDoor = true;
                 }
                 break;
             case SquadController.Goal.Protecting: //done
-                if(mySquad.protectTarget != gameObject)
+                if(MySquad.ProtectTarget != gameObject)
                 {
-                    transform.LookAt(mySquad.protectTarget.transform);
+                    transform.LookAt(MySquad.ProtectTarget.transform);
                 }
                 break;
             default:
@@ -201,59 +200,59 @@ public class Grunt : MonoBehaviour, Soldier
     }
     void Attack()
     {
-        if (firstShot)
+        if (FirstShot)
         {
-            fireDelta = 2.0f;
-            firstShot = false;
+            FireDelta = 2.0f;
+            FirstShot = false;
         }
-        if (sightOfPlayer)
+        if (SightOfPlayer)
         {
             Vector3[] positions = new Vector3[2];
             positions[0] = transform.position;
-            positions[1] = targetTf.position;
-            aimLine.SetPositions(positions);
-            aimLineObject.SetActive(true);
-            if (playerController.isWounded && navAgent.remainingDistance >= 1)
+            positions[1] = TargetTf.position;
+            AimLine.SetPositions(positions);
+            AimLineObject.SetActive(true);
+            if (PlayerController.isWounded && NavAgent.remainingDistance >= 1)
             {
-                navAgent.SetDestination(lastKnownPosition);
-                navAgent.isStopped = true;
+                NavAgent.SetDestination(LastKnownPosition);
+                NavAgent.isStopped = true;
             }
-            else if (playerController.isWounded)
+            else if (PlayerController.isWounded)
             {
-                navAgent.SetDestination(lastKnownPosition);
-                navAgent.isStopped = false;
+                NavAgent.SetDestination(LastKnownPosition);
+                NavAgent.isStopped = false;
             }
             else
             {
-                myRb.velocity = Vector3.zero;
-                transform.LookAt(targetTf);
-                navAgent.isStopped = true;
+                MyRb.velocity = Vector3.zero;
+                transform.LookAt(TargetTf);
+                NavAgent.isStopped = true;
             }
-            fireDelta -= Time.deltaTime;
-            switch (mySquad.huntOrCapture)
+            FireDelta -= Time.deltaTime;
+            switch (MySquad.huntOrCapture)
             {
                 case SquadController.HuntOrCapture.Hunt:
-                    aimLine.startColor = Color.red;
-                    aimLine.endColor = Color.red;
-                    if (fireDelta <= 0)
+                    AimLine.startColor = Color.red;
+                    AimLine.endColor = Color.red;
+                    if (FireDelta <= 0)
                     {
-                        GameObject temp = Instantiate(bullet, transform.position + (transform.forward * 2), transform.rotation);
-                        temp.transform.LookAt(targetTf);
+                        GameObject temp = Instantiate(Bullet, transform.position + (transform.forward * 2), transform.rotation);
+                        temp.transform.LookAt(TargetTf);
                         temp.GetComponent<ShotController>().canKill = true;
-                        fireDelta = 1.5f;
+                        FireDelta = 1.5f;
                     }
                     break;
                 case SquadController.HuntOrCapture.Capture:
-                    aimLine.startColor = Color.blue;
-                    aimLine.endColor = Color.blue;
-                    if (fireDelta <= 0 && !playerController.isWounded)
+                    AimLine.startColor = Color.blue;
+                    AimLine.endColor = Color.blue;
+                    if (FireDelta <= 0 && !PlayerController.isWounded)
                     {
-                        GameObject temp = Instantiate(bullet, transform.position + (transform.forward * 2), transform.rotation);
-                        temp.transform.LookAt(targetTf);
+                        GameObject temp = Instantiate(Bullet, transform.position + (transform.forward * 2), transform.rotation);
+                        temp.transform.LookAt(TargetTf);
                         temp.GetComponent<ShotController>().canKill = false;
-                        fireDelta = 1.5f;
+                        FireDelta = 1.5f;
                     }
-                    else if (playerController.isWounded && mySquad.knownRooms[RoomInfo.RoomType.Server].Count <= 0)
+                    else if (PlayerController.isWounded && MySquad.KnownRooms[RoomInfo.RoomType.Server].Count <= 0)
                     {
 
                     }
@@ -262,49 +261,49 @@ public class Grunt : MonoBehaviour, Soldier
         }
         else
         {
-            fireDelta = 2.0f;
-            aimLineObject.SetActive(false);
-            navAgent.SetDestination(lastKnownPosition);
-            navAgent.isStopped = false;
+            FireDelta = 2.0f;
+            AimLineObject.SetActive(false);
+            NavAgent.SetDestination(LastKnownPosition);
+            NavAgent.isStopped = false;
         }
 
     }
     void MoveToSquad()
     {
-        navAgent.SetDestination(mySquad.transform.position);
-        if (navAgent.remainingDistance >= 2)
+        NavAgent.SetDestination(MySquad.transform.position);
+        if (NavAgent.remainingDistance >= 2)
         {
-            navAgent.isStopped = false;
+            NavAgent.isStopped = false;
         }
         else
         {
-            myRb.velocity = Vector3.zero;
-            navAgent.isStopped = true;
+            MyRb.velocity = Vector3.zero;
+            NavAgent.isStopped = true;
         }
     }
     public void Death() //call RemoveSoldier(), destroy object, instantiate explosion
     {
-        if (mySquad != null)
+        if (MySquad != null)
         {
-            mySquad.soldiersInSquad.Remove(gameObject);
-            if (mySquad.soldiersInRange.Contains(gameObject))
+            MySquad.SoldiersInSquad.Remove(gameObject);
+            if (MySquad.SoldiersInRange.Contains(gameObject))
             {
-                mySquad.soldiersInRange.Remove(gameObject);
+                MySquad.SoldiersInRange.Remove(gameObject);
             }
         }
-        Destroy(Instantiate(deathEffect, transform.position, transform.rotation), 2.0f);
-        Destroy(aimLineObject);
+        Destroy(Instantiate(DeathEffect, transform.position, transform.rotation), 2.0f);
+        Destroy(AimLineObject);
         Destroy(gameObject);
 
     }
 
     public IEnumerator OpenDoor(Door targetDoor)
     {
-        while(!targetDoor.isOpen)
+        while(!targetDoor.IsOpen)
         {
-            targetDoor.Open(techSkill, mySquad);
+            targetDoor.Open(TechSkill, MySquad);
             yield return new WaitForSeconds(1f);
         }
-        mySquad.EvaluateRequest(gameObject, SquadController.SoldierRequest.SearchComplete);
+        MySquad.EvaluateRequest(gameObject, SquadController.SoldierRequest.SearchComplete);
     }
 }

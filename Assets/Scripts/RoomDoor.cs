@@ -1,67 +1,78 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class RoomDoor : MonoBehaviour, Door
 {
-    public bool isOpen { get; set; }
-    public float percentOpen { get; set; }
-    public List<GameObject> canOpen { get; set; }
-    public Animator animator { get; set; }
+    public bool IsOpen { get; set; }
+    public float PercentOpen { get; set; }
+    public List<GameObject> CanOpen { get; set; }
+    public Animator Animator { get; set; }
 
-    public RoomInfo connectedRoom;
+    public RoomInfo ConnectedRoom;
     
     void Start() //Start closed
     {
-        percentOpen = 0;
-        animator = gameObject.GetComponentInChildren<Animator>();
-        canOpen = new List<GameObject>();
-        isOpen = false;
+        PercentOpen = 0;
+        Animator = gameObject.GetComponentInChildren<Animator>();
+        CanOpen = new List<GameObject>();
+        IsOpen = false;
     }
     public void Open()
     {
         Debug.Log("opening");
-        animator.Play("open");
-        isOpen = true;
-        if (!connectedRoom.evaluated)
+        Animator.Play("open");
+        IsOpen = true;
+        if (!ConnectedRoom.evaluated)
         {
-            connectedRoom.EvaluateRoom();
+            ConnectedRoom.EvaluateRoom();
         }
     }
     public void Open(float value, SquadController squad)
     {
-        if (percentOpen >= 100)
+        if (PercentOpen >= 100)
         {
-            isOpen = true;
-            animator.Play("open");
-            if (!connectedRoom.evaluated)
+            IsOpen = true;
+            Animator.Play("open");
+            if (!ConnectedRoom.evaluated)
             {
-                connectedRoom.EvaluateRoom(squad);
+                ConnectedRoom.EvaluateRoom(squad);
             }
         }
         else
         {
-            percentOpen += value;
+            PercentOpen += value;
         }
 
     }
     public void Close()
     {
-        animator.Play("close");
-        isOpen = false;
+        Animator.Play("close");
+        IsOpen = false;
+    }
+
+    public void Toggle()
+    {
+        if (IsOpen)
+        {
+            Close();
+        }
+        else
+        {
+            Open();
+        }
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Enemy") && !canOpen.Contains(other.gameObject))
+        if (other.CompareTag("Enemy") && !CanOpen.Contains(other.gameObject))
         {
-            canOpen.Add(other.gameObject);
+            CanOpen.Add(other.gameObject);
         }
     }
     private void OnTriggerExit(Collider other)
     {
-        if (canOpen.Contains(other.gameObject))
+        if (CanOpen.Contains(other.gameObject))
         {
-            canOpen.Remove(other.gameObject);
+            CanOpen.Remove(other.gameObject);
         }
     }
 }
