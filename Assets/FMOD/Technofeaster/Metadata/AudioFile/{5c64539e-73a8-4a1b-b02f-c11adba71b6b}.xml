@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="AudioFile" id="{5c64539e-73a8-4a1b-b02f-c11adba71b6b}">
+		<property name="assetPath">
+			<value>Science Fiction Sci-Fi Electronic Computer Datastream 01 - Trimmed - Trimmed.wav</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>48</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>1.2037916666666666</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{848160ae-3ebb-4e16-a672-5af0f62f2801}</destination>
+		</relationship>
+	</object>
+</objects>

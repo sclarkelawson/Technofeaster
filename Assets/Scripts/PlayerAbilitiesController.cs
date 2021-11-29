@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
 using System.Linq;
@@ -9,7 +8,8 @@ public class PlayerAbilitiesController : MonoBehaviour
 {
     public enum TargetTag { Enemy, AccessPoint, Door, Interactable }
     public CinemachineFreeLook ThirdPersonCamera;
-    WaitForFixedUpdate wait;
+    public float TelefragCompletion;
+    readonly WaitForFixedUpdate wait;
     [SerializeField]
     private CinemachineVirtualCamera TelefragCam;
     [SerializeField]
@@ -19,11 +19,13 @@ public class PlayerAbilitiesController : MonoBehaviour
     [SerializeField]
     private PlayerController PlayerController;
     [SerializeField]
-    private GameObject ExplosionEffect, ChargingEffect;
+    private GameObject ChargingEffect;
     [SerializeField]
     private float RaycastBuffer, AttackDistance, AccessSpeed;
     [SerializeField]
     private TargetTag TelefragTargetType;
+    [SerializeField]
+    private TelefragEffectController EffectController;
     private int _telefragMask, _terrainMask;
 
 
@@ -59,8 +61,26 @@ public class PlayerAbilitiesController : MonoBehaviour
                     case "Enemy":
                         TelefragTargetType = TargetTag.Enemy;
                         Soldier targetSoldier = target.GetComponent<Soldier>();
-                        telefragModifier = targetSoldier.Fear;
-                        _targetAction = targetSoldier.Death;
+                        if(targetSoldier != null)
+                        {
+                            telefragModifier = targetSoldier.Fear;
+                            _targetAction = delegate ()
+                                            {
+                                                targetSoldier.Death();
+                                                EffectController.TeleportEffect();
+                                                transform.position = target.transform.position;
+                                            };
+                        }
+                        else
+                        {
+                            telefragModifier = AccessSpeed;
+                            _targetAction = delegate ()
+                                            {
+                                                Destroy(target);
+                                                EffectController.TeleportEffect();
+                                                transform.position = target.transform.position;
+                                            };
+                        }
                         break;
                     case "AccessPoint":
                         TelefragTargetType = TargetTag.AccessPoint;
@@ -89,12 +109,15 @@ public class PlayerAbilitiesController : MonoBehaviour
 
     IEnumerator Telefragging(Transform targetTf, TargetTag telefragTargetType, float telefragModifier)
     {
-        PlayerController.lockMove = true;
-        PlayerController.lockLook = true;
-        _telefragCompletion = 0;
+        PlayerController.LockMove = true;
+        PlayerController.LockLook = true;
+        TelefragCompletion = 0;
         CinemachineSmoothPath smoothPath = CreateNewSmoothPath();
         PrepareDollyTrackAndCamera(smoothPath, targetTf);
         StartCoroutine(RaycastBufferTime());
+        float percentPerSecond = (50 * (telefragModifier / 100));
+        float secondsToComplete = 100 / percentPerSecond;
+        EffectController.StartChargingEffect(secondsToComplete);
         //Play charging sound
         //GameObject chargingEffectInstance = Instantiate(chargingEffect, target.position, target.rotation);
         while (Input.GetButton("Fire1"))
@@ -110,24 +133,28 @@ public class PlayerAbilitiesController : MonoBehaviour
                     }
                 }
             }
-            if (_telefragCompletion >= 100)
+            if (TelefragCompletion >= 100)
             {
                 break;
             }
             smoothPath.m_Waypoints[1].position = targetTf.position;
-            TelefragDolly.m_PathPosition = Mathf.Clamp(smoothPath.MaxPos * ((_telefragCompletion - 20) / 100), 0, smoothPath.MaxPos * 0.8f);
-            _telefragCompletion += (50 * (telefragModifier / 100)) * Time.deltaTime;
+            TelefragDolly.m_PathPosition = Mathf.Clamp(smoothPath.MaxPos * ((TelefragCompletion - 20) / 100), 0, smoothPath.MaxPos * 0.8f);
+            TelefragCompletion += percentPerSecond * Time.deltaTime;
             yield return wait;
         }
         TelefragCam.gameObject.SetActive(false);
-        if(_telefragCompletion >= 100)
+        if(TelefragCompletion >= 100)
         {
             _telefragComplete?.Invoke(this, EventArgs.Empty);
         }
+        else
+        {
+            EffectController.StopChargingEffect();
+        }
         //Destroy(chargingEffectInstance);
         //End charging sound
-        PlayerController.lockMove = false;
-        PlayerController.lockLook = false;
+        PlayerController.LockMove = false;
+        PlayerController.LockLook = false;
         Destroy(smoothPath.gameObject);
 
     }
@@ -179,7 +206,6 @@ public class PlayerAbilitiesController : MonoBehaviour
         _bufferComplete = true;
     }
 
-    private float _telefragCompletion;
     private bool _bufferComplete;
     private string[] _targetableTags;
     private event EventHandler _telefragComplete;

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
 
@@ -7,8 +5,8 @@ public class PlayerController : MonoBehaviour
 {
     public Transform playerCameraTf;
     public Rigidbody playerRb;
-    public float speed;
-    public bool lockMove, lockLook, isWounded;
+    public float Speed;
+    public bool LockMove, LockLook, IsWounded;
     Vector2 inputXY;
 
     // Start is called before the first frame update
@@ -27,20 +25,20 @@ public class PlayerController : MonoBehaviour
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
         inputXY = new Vector2(horizontalInput, verticalInput);
-        Vector3 moveDirection = (playerCamForward * inputXY.y * speed + playerCamRight * inputXY.x * speed);
-        if (isWounded)
+        Vector3 moveDirection = (playerCamForward * inputXY.y * Speed + playerCamRight * inputXY.x * Speed);
+        if (IsWounded)
         {
             moveDirection /= 2;
         }
         Vector3 newVelocity = new Vector3(moveDirection.x, playerRb.velocity.y, moveDirection.z);
-        if (moveDirection != Vector3.zero)
+        if (LockMove)
+        {
+            playerRb.velocity = Vector3.zero;
+        }
+        else if (moveDirection != Vector3.zero)
         {
             playerRb.velocity = newVelocity;
             transform.forward = moveDirection;
-        }
-        else if (lockMove)
-        {
-            playerRb.velocity = Vector3.zero;
         }
         else
         {
@@ -50,7 +48,7 @@ public class PlayerController : MonoBehaviour
 
     public float GetAxisCustom(string axisName)
     {
-        if (!lockLook) {
+        if (!LockLook) {
             return Input.GetAxis(axisName);
         }
         return 0;

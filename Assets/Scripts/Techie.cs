@@ -96,7 +96,7 @@ public class Techie : MonoBehaviour, Soldier
                     {
                         EngageTimer = 10f;
                     }
-                    else if (!PlayerController.isWounded)
+                    else if (!PlayerController.IsWounded)
                     {
                         EngageTimer = 10f - (9f / (Fear + 1));
                     }
@@ -213,12 +213,12 @@ public class Techie : MonoBehaviour, Soldier
             positions[1] = TargetTf.position;
             AimLine.SetPositions(positions);
             AimLineObject.SetActive(true);
-            if (PlayerController.isWounded && NavAgent.remainingDistance >= 1)
+            if (PlayerController.IsWounded && NavAgent.remainingDistance >= 1)
             {
                 NavAgent.SetDestination(LastKnownPosition);
                 NavAgent.isStopped = true;
             }
-            else if (PlayerController.isWounded)
+            else if (PlayerController.IsWounded)
             {
                 NavAgent.SetDestination(LastKnownPosition);
                 NavAgent.isStopped = false;
@@ -246,14 +246,14 @@ public class Techie : MonoBehaviour, Soldier
                 case SquadController.HuntOrCapture.Capture:
                     AimLine.startColor = Color.blue;
                     AimLine.endColor = Color.blue;
-                    if (FireDelta <= 0 && !PlayerController.isWounded)
+                    if (FireDelta <= 0 && !PlayerController.IsWounded)
                     {
                         GameObject temp = Instantiate(Bullet, transform.position + (transform.forward * 2), transform.rotation);
                         temp.transform.LookAt(TargetTf);
                         temp.GetComponent<ShotController>().canKill = false;
                         FireDelta = 1.5f;
                     }
-                    else if (PlayerController.isWounded && MySquad.KnownRooms[RoomInfo.RoomType.Server].Count <= 0)
+                    else if (PlayerController.IsWounded && MySquad.KnownRooms[RoomInfo.RoomType.Server].Count <= 0)
                     {
 
                     }

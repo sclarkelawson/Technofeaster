@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="ParameterPreset" id="{d99ddf32-3e77-403d-86f7-2bd44c0f334a}">
+		<property name="name">
+			<value>TelefragCompletion</value>
+		</property>
+		<relationship name="folder">
+			<destination>{39dd2de4-d067-4a49-a9ae-3b4b812c3a09}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{385b8c25-9aae-4c4f-8c44-3a171de4465c}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{385b8c25-9aae-4c4f-8c44-3a171de4465c}">
+		<property name="maximum">
+			<value>100</value>
+		</property>
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+		<relationship name="automators">
+			<destination>{916b0e68-0682-4a56-974a-b82552387998}</destination>
+		</relationship>
+	</object>
+	<object class="Automator" id="{916b0e68-0682-4a56-974a-b82552387998}">
+		<property name="nameOfPropertyBeingAutomated">
+			<value>cursorPosition</value>
+		</property>
+	</object>
+</objects>

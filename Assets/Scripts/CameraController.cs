@@ -36,11 +36,9 @@ public class CameraController : MonoBehaviour
     IEnumerator ChangeCamera(float direction)
     {
         ChangingCameras = true;
-        Debug.Log("Direction: " + direction);
         //fadeToBlackCamera.SetActive(true);
         int currentIndex = Cameras.IndexOf(CurrentCamera);
         int nextIndexDirection = (int)Mathf.Sign(direction);
-        Debug.Log("Rounded Direction: " + nextIndexDirection);
         int nextIndex = currentIndex + nextIndexDirection;
         if (nextIndex >= Cameras.Count)
         {
@@ -50,7 +48,6 @@ public class CameraController : MonoBehaviour
         {
             nextIndex = Cameras.Count - 1;
         }
-        Debug.Log("Next Index: " + nextIndex);
         GameObject nextCamera = Cameras[nextIndex];
         nextCamera.SetActive(true);
         yield return new WaitForSeconds(1.0f);

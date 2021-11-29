@@ -18,11 +18,11 @@ public class ShotController : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             PlayerController playerController = other.GetComponent<PlayerController>();
-            if (playerController.isWounded)
+            if (playerController.IsWounded)
             {
                 //kill
             }
-            playerController.isWounded = true;
+            playerController.IsWounded = true;
         }
         Destroy(gameObject);
     }

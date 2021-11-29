@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="AudioFile" id="{087cd07c-0a77-4ef3-86ea-a30eb96cd0d9}">
+		<property name="assetPath">
+			<value>EMF_164_Desktop_Computer - Trimmed.wav</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>48</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>0.9995208333333333</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{848160ae-3ebb-4e16-a672-5af0f62f2801}</destination>
+		</relationship>
+	</object>
+</objects>

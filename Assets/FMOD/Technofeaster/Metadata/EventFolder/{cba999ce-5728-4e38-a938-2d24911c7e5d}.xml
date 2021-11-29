@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="EventFolder" id="{cba999ce-5728-4e38-a938-2d24911c7e5d}">
+		<property name="name">
+			<value>Telefrag</value>
+		</property>
+		<relationship name="folder">
+			<destination>{407c666f-8895-45e1-b850-cf97e432159f}</destination>
+		</relationship>
+	</object>
+</objects>

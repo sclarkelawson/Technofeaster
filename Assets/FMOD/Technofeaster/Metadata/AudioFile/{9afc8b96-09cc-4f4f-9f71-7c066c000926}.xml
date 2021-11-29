@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="AudioFile" id="{9afc8b96-09cc-4f4f-9f71-7c066c000926}">
+		<property name="assetPath">
+			<value>Drones_Heavy_05 1.aif</value>
+		</property>
+		<property name="isStreaming">
+			<value>true</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>48</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>20.580354166666666</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{848160ae-3ebb-4e16-a672-5af0f62f2801}</destination>
+		</relationship>
+	</object>
+</objects>
